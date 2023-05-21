@@ -1,0 +1,21 @@
+from rest_framework import serializers
+
+from .models import Post
+
+
+class PostSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Post
+        fields = '__all__'
+
+
+class PublicPostSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Post
+        fields = [
+            'title',
+            'content',
+            'slug',
+            'image',
+            'updated_at',
+        ]
