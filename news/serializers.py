@@ -32,7 +32,10 @@ class NewsSourceSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'site_name',
-            'site_url',
+            'site_domain',
+            'news_url',
+            'html_tag',
+            'html_tag_classes',
             'total_posts_count',
             'published_posts_count',
             'unpublished_posts_count',

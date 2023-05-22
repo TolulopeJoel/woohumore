@@ -1,9 +1,13 @@
 from django.db import models
+from django.utils import timezone
 
 
 class NewsSource(models.Model):
     site_name = models.CharField(max_length=255)
-    site_url = models.URLField()
+    site_domain = models.URLField(max_length=255)
+    news_url = models.URLField()
+    html_tag = models.CharField(max_length=255)
+    html_tag_classes = models.CharField(max_length=255)
 
     def __str__(self):
         return self.site_name
@@ -26,10 +30,18 @@ class Post(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    published_date = models.DateTimeField(blank=True, null=True)
 
     class Meta:
         ordering = ('created_at',)
         unique_together = 'news_source', 'title'
 
+    def save(self, *args, **kwargs):
+        if self.published and not self.published_date:
+            self.published_date = timezone.now()
+        elif not self.published and self.published_date:
+            self.published_date = None
+        return super().save(*args, **kwargs)
+
     def __str__(self):
-        return f"{self.title} from {self.news_source}"
+        return f'"{self.title} " from {self.news_source}'
