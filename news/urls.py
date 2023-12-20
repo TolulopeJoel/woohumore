@@ -3,12 +3,13 @@ from rest_framework.routers import DefaultRouter
 
 from . import views
 
-urlpatterns = [
-    path('sources/', views.NewsSourceListView.as_view(), name='news_source_list'),
-]
+# urlpatterns = [
+#     path('sources/', views.NewsSourceListView.as_view(), name='news_source_list'),
+# ]
 
 router = DefaultRouter()
 
 router.register('posts', views.PostViewset, basename='posts')
+router.register('sources', views.NewsSourceViewset, basename='posts')
 
-urlpatterns += router.urls
+urlpatterns = router.urls

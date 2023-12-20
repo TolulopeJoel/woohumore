@@ -40,16 +40,7 @@ class NewsSourceSerializer(serializers.ModelSerializer):
             'published_posts_count',
             'unpublished_posts_count',
         ]
-
-
-class NewsSourceDetailSerializer(NewsSourceSerializer):
-    posts = PublicPostSerializer(read_only=True, many=True)
-
-    class Meta:
-        model = NewsSource
-        fields = NewsSourceSerializer.Meta.fields + ['posts']
-    
-
+        
     def get_total_posts_count(self, obj):
         posts = obj.posts.all()
 
@@ -66,3 +57,11 @@ class NewsSourceDetailSerializer(NewsSourceSerializer):
         unpublished_posts = posts.filter(published=False)
 
         return unpublished_posts.count()
+
+
+class NewsSourceDetailSerializer(NewsSourceSerializer):
+    posts = PublicPostSerializer(read_only=True, many=True)
+
+    class Meta:
+        model = NewsSource
+        fields = NewsSourceSerializer.Meta.fields + ['posts']
