@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     
     # local apps
     'news.apps.NewsConfig',
-    'fetcher.apps.FetcherConfig',
+    'scraper.apps.ScraperConfig',
     
     # 3rd party apps
     'rest_framework',
