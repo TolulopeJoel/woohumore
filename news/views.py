@@ -1,6 +1,6 @@
 from rest_framework import generics, viewsets
 
-from .models import NewsSource, Post
+from .models import Source, Post
 from .serializers import (
     NewsSourceDetailSerializer,
     NewsSourceSerializer,
@@ -10,7 +10,7 @@ from .serializers import (
 
 
 class NewsSourceViewset(viewsets.ReadOnlyModelViewSet):
-    queryset = NewsSource.objects.all()
+    queryset = Source.objects.all()
     serializer_class = NewsSourceSerializer
 
     def get_serializer_class(self):

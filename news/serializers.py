@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import NewsSource, Post
+from .models import Source, Post
 
 
 class PostSerializer(serializers.ModelSerializer):
@@ -23,12 +23,12 @@ class PublicPostSerializer(serializers.ModelSerializer):
 
 
 class NewsSourceSerializer(serializers.ModelSerializer):
-    total_posts_count = serializers.SerializerMethodField()
-    published_posts_count = serializers.SerializerMethodField()
-    unpublished_posts_count = serializers.SerializerMethodField()
+    total_posts= serializers.SerializerMethodField()
+    published_posts = serializers.SerializerMethodField()
+    unpublished_posts = serializers.SerializerMethodField()
 
     class Meta:
-        model = NewsSource
+        model = Source
         fields = [
             'id',
             'site_name',
@@ -36,26 +36,23 @@ class NewsSourceSerializer(serializers.ModelSerializer):
             'news_url',
             'html_tag',
             'html_tag_classes',
-            'total_posts_count',
-            'published_posts_count',
-            'unpublished_posts_count',
+            'total_posts',
+            'published_posts',
+            'unpublished_posts',
         ]
-        
-    def get_total_posts_count(self, obj):
-        posts = obj.posts.all()
 
+    def get_total_posts(self, obj):
+        posts = obj.posts.all()
         return posts.count()
 
-    def get_published_posts_count(self, obj):
+    def get_published_posts(self, obj):
         posts = obj.posts.all()
         published_posts = posts.filter(published=True)
-
         return published_posts.count()
 
-    def get_unpublished_posts_count(self, obj):
+    def get_unpublished_posts(self, obj):
         posts = obj.posts.all()
         unpublished_posts = posts.filter(published=False)
-
         return unpublished_posts.count()
 
 
@@ -63,5 +60,5 @@ class NewsSourceDetailSerializer(NewsSourceSerializer):
     posts = PublicPostSerializer(read_only=True, many=True)
 
     class Meta:
-        model = NewsSource
+        model = Source
         fields = NewsSourceSerializer.Meta.fields + ['posts']
