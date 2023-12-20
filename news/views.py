@@ -2,18 +2,24 @@ from rest_framework import generics, viewsets
 
 from .models import NewsSource, Post
 from .serializers import (
+    NewsSourceDetailSerializer,
     NewsSourceSerializer,
     PostSerializer,
     PublicPostSerializer
 )
 
 
-class NewsSourceListView(generics.ListCreateAPIView):
+class NewsSourceViewset(viewsets.ReadOnlyModelViewSet):
     queryset = NewsSource.objects.all()
     serializer_class = NewsSourceSerializer
 
+    def get_serializer_class(self):
+        if self.action == 'retrieve':
+            return NewsSourceDetailSerializer
+        return super().get_serializer_class()
 
-class PostViewset(viewsets.ModelViewSet):
+
+class PostViewset(viewsets.ReadOnlyModelViewSet):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
 
