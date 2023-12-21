@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 
 
 class Source(models.Model):
@@ -22,7 +23,7 @@ class Post(models.Model):
         on_delete=models.SET_NULL
     )
     title = models.CharField(max_length=255)
-    content = models.TextField()
+    body = models.TextField()
     image = models.URLField(blank=True)
     published = models.BooleanField(default=False)
     published_date = models.DateTimeField(blank=True, null=True)
@@ -33,6 +34,13 @@ class Post(models.Model):
     class Meta:
         ordering = ('created_at',)
         unique_together = 'news_source', 'title'
+
+    def save(self, *args, **kwargs):
+        if self.published and not self.published_date:
+            self.published_date = timezone.now()
+        elif not self.published and self.published_date:
+            self.published_date = None
+        return super().save(*args, **kwargs)
 
     def __str__(self):
         return self.title
