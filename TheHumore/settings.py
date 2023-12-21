@@ -37,11 +37,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    
+
     # local apps
+    'videos.apps.VideosConfig',
     'posts.apps.PostsConfig',
     'scraper.apps.ScraperConfig',
-    
+
     # 3rd party apps
     'rest_framework',
 ]
