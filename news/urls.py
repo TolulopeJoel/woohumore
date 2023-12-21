@@ -1,15 +1,11 @@
-from django.urls import path
 from rest_framework.routers import DefaultRouter
 
 from . import views
 
-# urlpatterns = [
-#     path('sources/', views.NewsSourceListView.as_view(), name='news_source_list'),
-# ]
 
 router = DefaultRouter()
 
 router.register('posts', views.PostViewset, basename='posts')
-router.register('sources', views.NewsSourceViewset, basename='posts')
+router.register('sources', views.SourceViewset, basename='sources')
 
 urlpatterns = router.urls

@@ -1,42 +1,19 @@
-from rest_framework import generics, viewsets
+from rest_framework import viewsets
 
-from .models import Source, Post
-from .serializers import (
-    NewsSourceDetailSerializer,
-    NewsSourceSerializer,
-    PostSerializer,
-    PublicPostSerializer
-)
+from .models import Post, Source
+from .serializers import PostDetailSerializer, PostListSerializer, SourceSerializer
 
 
-class NewsSourceViewset(viewsets.ReadOnlyModelViewSet):
+class SourceViewset(viewsets.ReadOnlyModelViewSet):
     queryset = Source.objects.all()
-    serializer_class = NewsSourceSerializer
-
-    def get_serializer_class(self):
-        if self.action == 'retrieve':
-            return NewsSourceDetailSerializer
-        return super().get_serializer_class()
+    serializer_class = SourceSerializer
 
 
 class PostViewset(viewsets.ReadOnlyModelViewSet):
-    queryset = Post.objects.all()
-    serializer_class = PostSerializer
+    queryset = Post.objects.filter(published=True)
+    serializer_class = PostListSerializer
 
     def get_serializer_class(self):
-        user = self.request.user
-
-        # return public serializer for Anonymous users
-        if not user.is_superuser:
-            return PublicPostSerializer
-
+        if self.action == 'retrieve':
+            return PostDetailSerializer
         return super().get_serializer_class()
-
-    def get_queryset(self):
-        default_queryset = super().get_queryset()
-
-        # return queryset with only published posts for Anonymous users
-        if self.get_serializer_class() == PublicPostSerializer:
-            return default_queryset.filter(validated=True, published=True)
-
-        return default_queryset
