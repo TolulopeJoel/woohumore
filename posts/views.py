@@ -5,7 +5,7 @@ from .serializers import PostDetailSerializer, PostListSerializer, SourceSeriali
 
 
 class SourceViewset(viewsets.ReadOnlyModelViewSet):
-    queryset = Source.objects.all()
+    queryset = Source.objects.filter(active=True)
     serializer_class = SourceSerializer
 
 
