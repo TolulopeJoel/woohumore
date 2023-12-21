@@ -4,7 +4,7 @@ from django.utils.text import slugify
 from rest_framework.response import Response
 from rest_framework.generics import GenericAPIView, ListAPIView
 
-from news.models import Source, Post
+from posts.models import Source, Post
 
 
 class ScrapePostsView(GenericAPIView):

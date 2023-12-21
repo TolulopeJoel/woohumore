@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     
     # local apps
-    'news.apps.NewsConfig',
+    'posts.apps.PostsConfig',
     'scraper.apps.ScraperConfig',
     
     # 3rd party apps
