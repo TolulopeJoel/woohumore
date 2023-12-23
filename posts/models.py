@@ -7,8 +7,15 @@ class Source(models.Model):
     domain = models.URLField(max_length=255)
     news_page = models.URLField()
     active = models.BooleanField(default=True)
+
     html_tag = models.CharField(max_length=255)
     html_tag_classes = models.CharField(max_length=255)
+
+    body_tag = models.CharField(max_length=255)
+    body_tag_classes = models.CharField(max_length=255)
+
+    image_tag = models.CharField(max_length=255)
+    image_tag_classes = models.CharField(max_length=255)
 
     def __str__(self):
         return self.name
