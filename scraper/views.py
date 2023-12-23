@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from posts.models import Post, Source
 
 
-class ScrapePostsView(GenericAPIView):
+class ScrapePostListView(GenericAPIView):
     new_posts_count = 0
     queryset = Source.objects.filter(active=True)
 
