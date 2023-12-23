@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from posts.models import Post, Source
 
 
-class ScrapePostsView(GenericAPIView):
+class ScrapePostListView(GenericAPIView):
     new_posts_count = 0
     queryset = Source.objects.filter(active=True)
 
@@ -85,3 +85,56 @@ class ScrapePostsView(GenericAPIView):
             new_post.save()
 
             self.new_posts_count += 1
+
+
+class ScrapePostDetailView(GenericAPIView):
+    def get(self, request, *args, **kwargs):
+        queryset = Post.objects.filter(no_body=True)
+        for post in queryset:
+            self.get_body_n_image(post)
+
+        return Response({
+            "status": "success",
+            "message": "Post content added successfully",
+        })
+
+    def get_body_n_image(self, post):
+        """
+        Retrieves the body and images of a post from the specified web page,
+        updates the post object, and returns a boolean indicating success.
+
+        Args:
+            post (Post): The post object to update.
+
+        Returns:
+            bool: True if the body and images were successfully retrieved and updated,
+                False otherwise.
+
+        """
+
+        web_page_response = requests.get(post.link_to_news)
+        soup = BeautifulSoup(web_page_response.text, 'lxml')
+
+        source = post.news_source
+        images = soup.find_all(
+            source.image_tag, class_=source.image_tag_classes
+        )
+        _images = {
+            f"image_{index + 1}": image.img.get('src')
+            for index, image in enumerate(images)
+        }
+        body = soup.find_all(source.body_tag, class_=source.body_tag_classes)
+        if body == []:
+            post.delete()
+            return False
+
+        for texts in body:
+            paragraphs = texts.find_all('p')
+            paragraphs = [p.text for p in paragraphs]
+            _body = "\n\n".join(paragraphs)
+
+        post.body = _body
+        post.images = _images
+        post.no_body = False
+        post.save()
+        return True
