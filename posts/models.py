@@ -18,7 +18,7 @@ class Post(models.Model):
     news_source = models.ForeignKey(
         Source,
         related_name='posts',
-        on_delete=models.SET_NULL
+        on_delete=models.CASCADE
     )
     title = models.CharField(max_length=255)
     body = models.TextField()
