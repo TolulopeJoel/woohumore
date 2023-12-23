@@ -24,6 +24,7 @@ class Post(models.Model):
     )
     title = models.CharField(max_length=255)
     body = models.TextField()
+    link_to_news = models.URLField()
     image = models.URLField(blank=True)
     published = models.BooleanField(default=False)
     published_date = models.DateTimeField(blank=True, null=True)
