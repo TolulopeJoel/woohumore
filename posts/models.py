@@ -17,8 +17,6 @@ class Source(models.Model):
 class Post(models.Model):
     news_source = models.ForeignKey(
         Source,
-        blank=True,
-        null=True,
         related_name='posts',
         on_delete=models.SET_NULL
     )
