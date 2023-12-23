@@ -2,14 +2,13 @@ import requests
 from bs4 import BeautifulSoup
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
-from transformers import T5Tokenizer, T5ForConditionalGeneration
 
 from posts.models import Post, Source
 
 
 class ScrapePostsView(GenericAPIView):
     new_posts_count = 0
-    queryset = Source.objects.all()
+    queryset = Source.objects.filter(active=True)
 
     def get(self, request, *args, **kwargs):
         """
@@ -20,7 +19,7 @@ class ScrapePostsView(GenericAPIView):
 
         for source in queryset:
             news_posts = self.get_posts(
-                source.news_url,
+                source.news_page,
                 source.html_tag,
                 source.html_tag_classes
             )
@@ -68,7 +67,6 @@ class ScrapePostsView(GenericAPIView):
 
         """
         post_title = post.text
-        post_image = post.find('img').get('src')
         post_link = post.a['href']
 
         if not post_link.startswith("https"):
@@ -81,44 +79,9 @@ class ScrapePostsView(GenericAPIView):
             new_post = Post(
                 news_source=source,
                 title=post_title,
-                body="temporary solution...",
+                body="None",
                 link_to_news=post_link,
-                image=post_image,
             )
-
-            new_post.body = self.summarize_post(new_post.body)
             new_post.save()
 
             self.new_posts_count += 1
-
-    def summarize_post(self, text):
-        """
-        Summarizes the given text using the T5 model.
-
-        Args:
-            text (str): The text to be summarized.
-
-        Returns:
-            str: The summarized text.
-
-        """
-        tokenizer = T5Tokenizer.from_pretrained("google/flan-t5-base")
-        model = T5ForConditionalGeneration.from_pretrained(
-            "google/flan-t5-base")
-
-        inputs = tokenizer.encode(
-            f"summarize: {text}",
-            return_tensors='pt',
-            max_length=1000,
-            truncation=True,
-        )
-
-        summary_ids = model.generate(
-            inputs,
-            max_length=150,
-            min_length=80,
-            length_penalty=5.,
-            num_beams=2
-        )
-
-        return tokenizer.decode(summary_ids[0])
