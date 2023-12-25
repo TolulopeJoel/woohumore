@@ -29,7 +29,7 @@ class PostDetailSerializer(serializers.ModelSerializer):
             'news_source',
             'title',
             'body',
-            'image',
+            'images',
             'published_date',
         ]
 
