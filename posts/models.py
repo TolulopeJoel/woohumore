@@ -8,8 +8,9 @@ class Source(models.Model):
     news_page = models.URLField()
     active = models.BooleanField(default=True)
 
-    html_tag = models.CharField(max_length=255)
-    html_tag_class = models.CharField(max_length=255)
+    title_tag = models.CharField(max_length=255)
+    link_tag = models.CharField(max_length=255)
+    link_tag_class = models.CharField(max_length=255)
 
     body_tag = models.CharField(max_length=255)
     body_tag_class = models.CharField(max_length=255)
