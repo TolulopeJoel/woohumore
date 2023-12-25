@@ -21,7 +21,7 @@ class ScrapePostListView(GenericAPIView):
             news_posts = self.get_posts(
                 source.news_page,
                 source.html_tag,
-                source.html_tag_classes
+                source.html_tag_class
             )
 
             for post in news_posts:
@@ -117,13 +117,13 @@ class ScrapePostDetailView(GenericAPIView):
 
         source = post.news_source
         images = soup.find_all(
-            source.image_tag, class_=source.image_tag_classes
+            source.image_tag, class_=source.image_tag_class
         )
         _images = {
             f"image_{index + 1}": image.img.get('src')
             for index, image in enumerate(images)
         }
-        body = soup.find_all(source.body_tag, class_=source.body_tag_classes)
+        body = soup.find_all(source.body_tag, class_=source.body_tag_class)
         if body == []:
             post.delete()
             return False

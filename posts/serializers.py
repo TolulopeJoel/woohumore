@@ -47,7 +47,7 @@ class SourceSerializer(serializers.ModelSerializer):
             'domain',
             'news_page',
             'html_tag',
-            'html_tag_classes',
+            'html_tag_class',
             'total_posts',
             'published_posts',
             'unpublished_posts',

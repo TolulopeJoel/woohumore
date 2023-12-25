@@ -9,13 +9,13 @@ class Source(models.Model):
     active = models.BooleanField(default=True)
 
     html_tag = models.CharField(max_length=255)
-    html_tag_classes = models.CharField(max_length=255)
+    html_tag_class = models.CharField(max_length=255)
 
     body_tag = models.CharField(max_length=255)
-    body_tag_classes = models.CharField(max_length=255)
+    body_tag_class = models.CharField(max_length=255)
 
     image_tag = models.CharField(max_length=255)
-    image_tag_classes = models.CharField(max_length=255)
+    image_tag_class = models.CharField(max_length=255)
 
     def __str__(self):
         return self.name
