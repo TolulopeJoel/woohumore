@@ -19,8 +19,13 @@ class ScrapePostListView(GenericAPIView):
         queryset = self.get_queryset()
 
         for source in queryset:
-            web_page_response = requests.get(source.news_page)
-            soup = BeautifulSoup(web_page_response.text, 'lxml')
+            headers = {
+                "User-Agent": "User-Agent:Mozilla/5.0 (iPhone; CPU iPhone OS 7_1_2 like Mac OS X) AppleWebKit/537.51.2 (KHTML, like Gecko) Version/7.0 Mobile/11D257 Safari/9537.53",
+                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+            }
+            session = requests.Session()
+            page_response = session.get(source.news_page, headers=headers)
+            soup = BeautifulSoup(page_response.text, 'lxml')
             self.create_post(source, soup)
 
         response_data = {
@@ -58,7 +63,7 @@ class ScrapePostListView(GenericAPIView):
                 post_link = source.domain + post_link
 
             post_exist = Post.objects.filter(
-                title=post_title, news_source=source).first()
+                link_to_news=post_link, news_source=source).first()
 
             if not post_exist:
                 new_post = Post(
@@ -96,8 +101,13 @@ class ScrapePostDetailView(GenericAPIView):
                 False otherwise.
 
         """
-        web_page_response = requests.get(post.link_to_news)
-        soup = BeautifulSoup(web_page_response.text, 'lxml')
+        headers = {
+            "User-Agent": "User-Agent:Mozilla/5.0 (iPhone; CPU iPhone OS 7_1_2 like Mac OS X) AppleWebKit/537.51.2 (KHTML, like Gecko) Version/7.0 Mobile/11D257 Safari/9537.53",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+        }
+        session = requests.Session()
+        page_response = session.get(post.link_to_news, headers=headers)
+        soup = BeautifulSoup(page_response.text, 'lxml')
 
         source = post.news_source
         images = soup.find_all(
