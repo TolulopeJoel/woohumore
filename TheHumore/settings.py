@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     # local apps
     'videos.apps.VideosConfig',
     'posts.apps.PostsConfig',
+    'subscribers.apps.SubscribersConfig',
     'scraper.apps.ScraperConfig',
 
     # 3rd party apps

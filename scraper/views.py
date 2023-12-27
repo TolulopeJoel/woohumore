@@ -4,11 +4,12 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 
 from posts.models import Post, Source
+from posts.views import SourceViewset
 
 
 class ScrapePostListView(GenericAPIView):
     new_posts_count = 0
-    queryset = Source.objects.filter(active=True)
+    queryset = SourceViewset.get_queryset(SourceViewset)
 
     def get(self, request, *args, **kwargs):
         """
@@ -18,14 +19,14 @@ class ScrapePostListView(GenericAPIView):
         queryset = self.get_queryset()
 
         for source in queryset:
-            news_posts = self.get_posts(
-                source.news_page,
-                source.html_tag,
-                source.html_tag_class
-            )
-
-            for post in news_posts:
-                self.create_post(source, post)
+            headers = {
+                "User-Agent": "User-Agent:Mozilla/5.0 (iPhone; CPU iPhone OS 7_1_2 like Mac OS X) AppleWebKit/537.51.2 (KHTML, like Gecko) Version/7.0 Mobile/11D257 Safari/9537.53",
+                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+            }
+            session = requests.Session()
+            page_response = session.get(source.news_page, headers=headers)
+            soup = BeautifulSoup(page_response.text, 'lxml')
+            self.create_post(source, soup)
 
         response_data = {
             "status": "success",
@@ -37,24 +38,7 @@ class ScrapePostListView(GenericAPIView):
 
         return Response(response_data)
 
-    def get_posts(self, web_page, tag, tag_class):
-        """
-        Retrieves posts from a web page based on the specified tag and class.
-
-        Args:
-            web_page (str): The URL of the web page to scrape.
-            tag (str): The HTML tag of the elements to search for.
-            tag_class (str): The class attribute of the elements to search for.
-
-        Returns:
-            list: A list of BeautifulSoup elements representing the posts found on the web page.
-
-        """
-        web_page_response = requests.get(web_page)
-        soup = BeautifulSoup(web_page_response.text, 'lxml')
-        return soup.find_all(tag, class_=tag_class)
-
-    def create_post(self, source, post):
+    def create_post(self, source: Source, soup):
         """
         Creates a new post object based on the provided source and post data.
 
@@ -66,25 +50,31 @@ class ScrapePostListView(GenericAPIView):
             None
 
         """
-        post_title = post.text
-        post_link = post.a['href']
+        links = soup.find_all(source.link_tag, class_=source.link_tag_class)
 
-        if not post_link.startswith("https"):
-            post_link = source.domain + post_link
+        for link in links:
+            title = link.find(source.title_tag) if link else None
+            post_title = title.text.strip()
 
-        post_exist = Post.objects.filter(
-            title=post_title, news_source=source).first()
+            if (post_link := link.get('href')) is None:
+                post_link = title.get('href')
 
-        if not post_exist:
-            new_post = Post(
-                news_source=source,
-                title=post_title,
-                body="None",
-                link_to_news=post_link,
-            )
-            new_post.save()
+            if not post_link.startswith("https"):
+                post_link = source.domain + post_link
 
-            self.new_posts_count += 1
+            post_exist = Post.objects.filter(
+                link_to_news=post_link, news_source=source).first()
+
+            if not post_exist:
+                new_post = Post(
+                    news_source=source,
+                    title=post_title,
+                    body="None",
+                    link_to_news=post_link,
+                )
+                new_post.save()
+
+                self.new_posts_count += 1
 
 
 class ScrapePostDetailView(GenericAPIView):
@@ -111,9 +101,13 @@ class ScrapePostDetailView(GenericAPIView):
                 False otherwise.
 
         """
-
-        web_page_response = requests.get(post.link_to_news)
-        soup = BeautifulSoup(web_page_response.text, 'lxml')
+        headers = {
+            "User-Agent": "User-Agent:Mozilla/5.0 (iPhone; CPU iPhone OS 7_1_2 like Mac OS X) AppleWebKit/537.51.2 (KHTML, like Gecko) Version/7.0 Mobile/11D257 Safari/9537.53",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+        }
+        session = requests.Session()
+        page_response = session.get(post.link_to_news, headers=headers)
+        soup = BeautifulSoup(page_response.text, 'lxml')
 
         source = post.news_source
         images = soup.find_all(
