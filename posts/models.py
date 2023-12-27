@@ -32,7 +32,7 @@ class Post(models.Model):
     body = models.TextField()
     link_to_news = models.URLField()
     images = models.JSONField(default=dict)
-    no_body = models.BooleanField(default=False) 
+    no_body = models.BooleanField(default=True) 
     published = models.BooleanField(default=False)
     published_date = models.DateTimeField(blank=True, null=True)
 
