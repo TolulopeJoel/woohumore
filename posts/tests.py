@@ -7,7 +7,7 @@ from rest_framework.test import APIClient, APITestCase
 from .models import Post, Source
 
 
-class GeneralTestCase(APITestCase):
+class BaseAPITestCase(APITestCase):
     def setUp(self):
         self.client = APIClient()
 
@@ -42,7 +42,7 @@ class GeneralTestCase(APITestCase):
         )
 
 
-class SourceViewsetTest(GeneralTestCase):
+class SourceViewsetTest(BaseAPITestCase):
     def test_source_list(self):
         endpoint = reverse('sources-list')
         response = self.client.get(endpoint)
@@ -64,7 +64,7 @@ class SourceViewsetTest(GeneralTestCase):
         self.source.save()
 
 
-class PostTest(GeneralTestCase):
+class PostTest(BaseAPITestCase):
     def test_published_post_list(self):
         """
         Tests that all listed posts are published posts
