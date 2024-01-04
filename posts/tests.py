@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.db import IntegrityError
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient, APITestCase
@@ -121,3 +122,41 @@ class PostTest(GeneralTestCase):
 
         for post in unpublished_posts:
             self.assertIsNone(post.published_date)
+
+    def test_auto_update_published_date(self):
+        """
+        Tests that the published_date is automatically updated
+        when a post is saved and published
+        """
+        self.post.published = True
+        self.post.save()
+
+        self.assertIsNotNone(self.post.published_date)
+
+    def test_ordering_of_posts(self):
+        """
+        Tests that the posts are ordered by created_at field
+        """
+        endpoint = reverse('posts-list')
+        response = self.client.get(endpoint)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        posts = Post.objects.filter(published=True).order_by('-created_at')
+        for i, post_data in enumerate(response.data):
+            post = posts[i]
+            self.assertEqual(post_data['id'], post.id)
+
+    def test_unique_link_per_post(self):
+        """
+        Tests that post link is unique
+        """
+        new_post = Post(
+            news_source=self.source,
+            title="Example Post",
+            body="Another body",
+            link_to_news="https://example.com/odd/example-post",
+            published=True,
+            published_date="2024-01-05T12:00:00Z"
+        )
+        with self.assertRaises(IntegrityError):
+            new_post.save()
