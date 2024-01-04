@@ -21,10 +21,8 @@ class ScrapePostTests(APITestCase):
         """
         url = reverse('scrape-post-list')
         response = self.client.get(url)
-        print(response.content)
-        self.assertScrapedPost(response)
 
-        # Add more assertions based on your specific response structure
+        self.assertScrapedPost(response)
 
     def test_scrape_post_detail_view(self):
         """
