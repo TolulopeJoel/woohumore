@@ -30,7 +30,7 @@ class Post(models.Model):
     )
     title = models.CharField(max_length=255)
     body = models.TextField()
-    link_to_news = models.URLField()
+    link_to_news = models.URLField(unique=True)
     images = models.JSONField(default=dict)
     no_body = models.BooleanField(default=True) 
     published = models.BooleanField(default=False)
@@ -41,7 +41,6 @@ class Post(models.Model):
 
     class Meta:
         ordering = ('created_at',)
-        unique_together = 'news_source', 'title'
 
     def save(self, *args, **kwargs):
         if self.published and not self.published_date:
