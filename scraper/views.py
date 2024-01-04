@@ -7,6 +7,19 @@ from posts.models import Post, Source
 from posts.views import SourceViewset
 
 
+def get_headers():
+    """
+    Returns headers for making HTTP requests.
+
+    Returns:
+        dict: Headers for the HTTP request.
+    """
+    return {
+        "User-Agent": "User-Agent:Mozilla/5.0 (iPhone; CPU iPhone OS 7_1_2 like Mac OS X) AppleWebKit/537.51.2 (KHTML, like Gecko) Version/7.0 Mobile/11D257 Safari/9537.53",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+    }
+
+
 class ScrapePostListView(GenericAPIView):
     new_posts_count = 0
     queryset = SourceViewset.get_queryset(SourceViewset)
@@ -19,12 +32,8 @@ class ScrapePostListView(GenericAPIView):
         queryset = self.get_queryset()
 
         for source in queryset:
-            headers = {
-                "User-Agent": "User-Agent:Mozilla/5.0 (iPhone; CPU iPhone OS 7_1_2 like Mac OS X) AppleWebKit/537.51.2 (KHTML, like Gecko) Version/7.0 Mobile/11D257 Safari/9537.53",
-                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
-            }
             session = requests.Session()
-            page_response = session.get(source.news_page, headers=headers)
+            page_response = session.get(source.news_page, headers=get_headers())
             soup = BeautifulSoup(page_response.text, 'lxml')
             self.create_post(source, soup)
 
@@ -101,12 +110,8 @@ class ScrapePostDetailView(GenericAPIView):
                 False otherwise.
 
         """
-        headers = {
-            "User-Agent": "User-Agent:Mozilla/5.0 (iPhone; CPU iPhone OS 7_1_2 like Mac OS X) AppleWebKit/537.51.2 (KHTML, like Gecko) Version/7.0 Mobile/11D257 Safari/9537.53",
-            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
-        }
         session = requests.Session()
-        page_response = session.get(post.link_to_news, headers=headers)
+        page_response = session.get(post.link_to_news, headers=get_headers())
         soup = BeautifulSoup(page_response.text, 'lxml')
 
         source = post.news_source
