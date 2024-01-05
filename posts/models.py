@@ -31,11 +31,11 @@ class Post(models.Model):
     )
     title = models.CharField(max_length=255)
     body = models.TextField()
-    audio = CloudinaryField(resource_type='audio', null=True)
     link_to_news = models.URLField(unique=True)
     images = models.JSONField(default=dict)
     no_body = models.BooleanField(default=True)
     published = models.BooleanField(default=False)
+    summarised = models.BooleanField(default=False)
     published_date = models.DateTimeField(blank=True, null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)

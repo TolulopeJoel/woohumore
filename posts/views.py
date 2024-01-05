@@ -1,10 +1,6 @@
-import operator
-from random import randint
-import re
 import spacy
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-import string
 
 from rest_framework import generics, viewsets
 from rest_framework.views import Response, status
