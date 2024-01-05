@@ -54,16 +54,15 @@ class ScrapePostListView(GenericAPIView):
 
         for source in queryset:
             session = requests.Session()
-            page_response = session.get(source.news_page, headers=get_headers())
+            page_response = session.get(
+                source.news_page, headers=get_headers()
+            )
             soup = BeautifulSoup(page_response.text, 'lxml')
             self.create_post(source, soup)
 
         response_data = {
             "status": "success",
-            "message": "New posts added successfully" if self.new_posts_count > 0 else "No news posts found",
-            "data": {
-                "new_posts_count": self.new_posts_count
-            }
+            "message": f"{self.new_posts_count} new posts added" if self.new_posts_count > 0 else "No news posts found",
         }
 
         return Response(response_data)
