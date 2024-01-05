@@ -1,3 +1,5 @@
+import re
+
 import requests
 from bs4 import BeautifulSoup
 from rest_framework.generics import GenericAPIView
@@ -18,6 +20,25 @@ def get_headers():
         "User-Agent": "User-Agent:Mozilla/5.0 (iPhone; CPU iPhone OS 7_1_2 like Mac OS X) AppleWebKit/537.51.2 (KHTML, like Gecko) Version/7.0 Mobile/11D257 Safari/9537.53",
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
     }
+
+
+def clean_text(text):
+    """
+    Cleans the given text by removing non-ASCII characters,
+    unwanted characters and symbols, and extra whitespaces.
+
+    Args:
+        text (str): The text to be cleaned.
+
+    Returns:
+        str: The cleaned text.
+    """
+    text = re.sub(r'\n+', ' ', text)
+    text = re.sub(r'[^\x00-\x7F]+', ' ', text)
+    text = re.sub(r'[\x80-\xFF]', '', text)
+    text = re.sub(r'\s+', ' ', text).strip()
+
+    return text
 
 
 class ScrapePostListView(GenericAPIView):
@@ -77,7 +98,7 @@ class ScrapePostListView(GenericAPIView):
             if not post_exist:
                 new_post = Post(
                     news_source=source,
-                    title=post_title,
+                    title=clean_text(post_title),
                     body="None",
                     link_to_news=post_link,
                 )
@@ -132,7 +153,7 @@ class ScrapePostDetailView(GenericAPIView):
             paragraphs = [p.text for p in paragraphs]
             _body = "\n\n".join(paragraphs)
 
-        post.body = _body
+        post.body = clean_text(_body)
         post.images = _images
         post.no_body = False
         post.save()
