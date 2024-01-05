@@ -1,4 +1,13 @@
-from rest_framework import viewsets
+import operator
+from random import randint
+import re
+import spacy
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+import string
+
+from rest_framework import generics, viewsets
+from rest_framework.views import Response, status
 
 from .models import Post, Source
 from .serializers import PostDetailSerializer, PostListSerializer, SourceSerializer
@@ -17,3 +26,55 @@ class PostViewset(viewsets.ReadOnlyModelViewSet):
         if self.action == 'retrieve':
             return PostDetailSerializer
         return super().get_serializer_class()
+
+
+class SummarisePost(generics.GenericAPIView):
+    queryset = Post.objects.filter(summarised=False, no_body=False)
+
+    def get(self, request, *args, **kwargs):
+        if queryset := self.get_queryset():
+            try:
+                for post in queryset:
+                    post.body = self.summarise_content(post.body, 5)
+                    post.summarised = True
+                    post.save()
+
+                return Response(
+                    {"status": "success", "message": f"{queryset.count()} posts have been summarised sucessfully"},
+                    status=status.HTTP_200_OK
+                )
+            except Exception:
+                return Response(
+                    {"status": "success", "message": "An error occurred"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        return Response({"status": "success", "message": "No new post to summarise"}, status=status.HTTP_200_OK)
+    
+    def summarise_content(self, text, num_sentences=5):
+        """
+        Summarises the content of a given text by extracting the most important sentences.
+
+        Args:
+            text (str): The text to be summarized.
+            num_sentences (int, optional): The number of sentences to include in the summary.
+
+        Returns:
+            str: The summarized content.
+        """
+        nlp = spacy.load("en_core_web_sm")
+
+        doc = nlp(text)
+        sentences = [sent.text for sent in doc.sents]
+
+        vectorizer = TfidfVectorizer()
+        X = vectorizer.fit_transform(sentences)
+
+        similarity_matrix = cosine_similarity(X, X)
+        scores = similarity_matrix.sum(axis=1)
+
+        top_indices = scores.argsort()[-num_sentences:][::-1]
+        top_indices.sort()
+
+        summary = ' '.join([sentences[i] for i in top_indices])
+
+        return summary
