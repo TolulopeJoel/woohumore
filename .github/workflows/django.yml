@@ -27,10 +27,9 @@ jobs:
         pip install -r requirements.txt
     - name: Run Tests
       env:
-        SECRET_KEY: ${{ secrets.SECRET_KEY }}
-        DEBUG: ${{ secrets.DEBUG }}
-        CLOUD_NAME: ${{ secrets.CLOUD_NAME }}
-        CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
-        CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
+        SECRET_KEY: ${{ vars.SECRET_KEY }}
+        CLOUD_NAME: ${{ vars.CLOUD_NAME }}
+        CLOUDINARY_API_KEY: ${{ vars.CLOUDINARY_API_KEY }}
+        CLOUDINARY_API_SECRET: ${{ vars.CLOUDINARY_API_SECRET }}
       run: |
         python manage.py test
