@@ -33,13 +33,16 @@ class Post(models.Model):
     body = models.TextField()
     link_to_news = models.URLField(unique=True)
     images = models.JSONField(default=dict)
+    audio = CloudinaryField(blank=True)
+
     no_body = models.BooleanField(default=True)
+    no_audio = models.BooleanField(default=True)
     published = models.BooleanField(default=False)
     summarised = models.BooleanField(default=False)
-    published_date = models.DateTimeField(blank=True, null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    published_date = models.DateTimeField(blank=True, null=True)
 
     class Meta:
         ordering = ('created_at',)
