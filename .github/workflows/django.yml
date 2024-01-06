@@ -21,6 +21,13 @@ jobs:
       uses: actions/setup-python@v3
       with:
         python-version: ${{ matrix.python-version }}
+    - name: Set Secrets
+      run: |
+        export SECRET_KEY=${{ secrets.SECRET_KEY }}
+        export DEBUG=${{ secrets.DEBUG }}
+        export CLOUD_NAME=${{ secrets.CLOUD_NAME }}
+        export CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }}
+        export CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}
     - name: Install Dependencies
       run: |
         python -m pip install --upgrade pip
