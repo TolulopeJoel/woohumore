@@ -1,9 +1,11 @@
+import contextlib
 import re
 
 import requests
 from bs4 import BeautifulSoup
+from django.shortcuts import redirect
+from django.urls import reverse
 from rest_framework.generics import GenericAPIView
-from rest_framework.response import Response
 
 from posts.models import Post, Source
 from posts.views import SourceViewset
@@ -57,15 +59,11 @@ class ScrapePostListView(GenericAPIView):
             page_response = session.get(
                 source.news_page, headers=get_headers()
             )
-            soup = BeautifulSoup(page_response.text, 'lxml')
-            self.create_post(source, soup)
-
-        response_data = {
-            "status": "success",
-            "message": f"{self.new_posts_count} new posts added" if self.new_posts_count > 0 else "No news posts found",
-        }
-
-        return Response(response_data)
+            # silence error when connection times out
+            with contextlib.suppress(requests.exceptions.ConnectTimeout):
+                soup = BeautifulSoup(page_response.text, 'lxml')
+                self.create_post(source, soup)
+        return redirect(reverse('scrape-post-detail'))
 
     def create_post(self, source: Source, soup):
         """
@@ -112,10 +110,7 @@ class ScrapePostDetailView(GenericAPIView):
         for post in queryset:
             self.get_body_n_image(post)
 
-        return Response({
-            "status": "success",
-            "message": "Post content added successfully",
-        })
+        return redirect(reverse('summarise-posts'))
 
     def get_body_n_image(self, post):
         """
