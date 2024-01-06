@@ -36,38 +36,46 @@ class SummarisePost(generics.GenericAPIView):
                     post.save()
 
                 return Response(
-                    {"status": "success", "message": f"{queryset.count()} posts have been summarised sucessfully"},
+                    {
+                        "status": "success",
+                        "message": f"{queryset.count()} posts have been added sucessfully"
+                    },
                     status=status.HTTP_200_OK
                 )
-            except Exception:
+            except Exception as e:
                 return Response(
-                    {"status": "success", "message": "An error occurred"},
+                    {"status": "success", "message": f"An error occurred {(e)}"},
                     status=status.HTTP_400_BAD_REQUEST
                 )
-        return Response({"status": "success", "message": "No new posts to summarise"}, status=status.HTTP_200_OK)
-    
+        return Response({"status": "success", "message": "No new posts"}, status=status.HTTP_200_OK)
+
     def summarise_content(self, text, num_sentences=5):
         """
-        Summarises the content of a given text by extracting the most important sentences.
+        Summarises the content of a given text by extracting
+        the most important sentences.
 
         Args:
             text (str): The text to be summarized.
-            num_sentences (int, optional): The number of sentences to include in the summary.
+            num_sentences (int): The number of sentences to include in the summary.
 
         Returns:
             str: The summarized content.
         """
         nlp = spacy.load("en_core_web_sm")
 
+        # extract individual sentences from tokenized document
         doc = nlp(text)
         sentences = [sent.text for sent in doc.sents]
 
+        # Create TF-IDF vectorizer to convert sentences into numerical vectors
         vectorizer = TfidfVectorizer()
         X = vectorizer.fit_transform(sentences)
 
+        # calculate sum of cosine similarity scores for each sentence
         similarity_matrix = cosine_similarity(X, X)
         scores = similarity_matrix.sum(axis=1)
 
+        # identify top 'num_sentences' sentences based on scores
         top_indices = scores.argsort()[-num_sentences:][::-1]
         top_indices.sort()
 
