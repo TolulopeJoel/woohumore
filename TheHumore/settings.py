@@ -143,6 +143,11 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # THIRD PARTY APPS  SETTINGS
 
+# play
+PLAY_USER_ID = env.str('PLAY_USER_ID')
+PLAY_API_KEY = env.str('PLAY_API_KEY')
+PLAY_VOICE = env.list('PLAY_VOICE')
+
 # cloudinary settings
 cloudinary.config(
     cloud_name=env.str('CLOUD_NAME'),
