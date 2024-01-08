@@ -31,5 +31,8 @@ jobs:
         CLOUD_NAME: ${{ vars.CLOUD_NAME }}
         CLOUDINARY_API_KEY: ${{ vars.CLOUDINARY_API_KEY }}
         CLOUDINARY_API_SECRET: ${{ vars.CLOUDINARY_API_SECRET }}
+        PLAY_USER_ID: ${{ vars.PLAY_USER_ID }}
+        PLAY_API_KEY: ${{ vars.PLAY_API_KEY }}
+        PLAY_VOICE: ${{ vars.PLAY_VOICE }}
       run: |
         python manage.py test

@@ -27,7 +27,7 @@ def get_headers():
 def clean_text(text):
     """
     Cleans the given text by removing non-ASCII characters,
-    unwanted characters and symbols, and extra whitespaces.
+    unwanted sentences, characters and symbols, and extra whitespaces.
 
     Args:
         text (str): The text to be cleaned.
@@ -39,6 +39,11 @@ def clean_text(text):
     text = re.sub(r'[^\x00-\x7F]+', ' ', text)
     text = re.sub(r'[\x80-\xFF]', '', text)
     text = re.sub(r'\s+', ' ', text).strip()
+    # remove unwanted beginning and ending sentences
+    text = re.sub(r"(Published|Last updated) .* GMT ", '', text)
+    text = re.sub(r"From .* inbox\.", '', text)
+    text = re.sub(r"For more .* newsletter\.", '', text)
+    text = re.sub(r"Topics: [^\n]+", '', text)
 
     return text
 
