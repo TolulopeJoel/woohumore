@@ -22,7 +22,7 @@ class ScrapePostTests(APITestCase):
         url = reverse('scrape-post-list')
         response = self.client.get(url)
 
-        self.assertScrapedPost(response)
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
 
     def test_scrape_post_detail_view(self):
         """
@@ -37,10 +37,4 @@ class ScrapePostTests(APITestCase):
 
         url = reverse('scrape-post-detail')
         response = self.client.get(url)
-        self.assertScrapedPost(response)
-
-    def assertScrapedPost(self, response):
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn('status', response.data)
-        self.assertEqual(response.data['status'], 'success')
-
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)

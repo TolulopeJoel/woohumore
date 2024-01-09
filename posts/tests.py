@@ -160,3 +160,25 @@ class PostTest(BaseAPITestCase):
         )
         with self.assertRaises(IntegrityError):
             new_post.save()
+
+
+class SummaryTest(BaseAPITestCase):
+    def test_summarize_posts_no_new_posts(self):
+        self.published_post.summarised = True
+        self.published_post.save()
+
+        url = reverse('summarise-posts')
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['status'], 'success')
+        self.assertEqual(response.data['message'], 'No new posts')
+
+    def test_summarize_posts_success(self):
+        url = reverse('summarise-posts')
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['status'], 'success')
+        self.assertEqual(response.data['message'],
+                         '1 posts have been added sucessfully')
