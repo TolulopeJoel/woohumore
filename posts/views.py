@@ -44,7 +44,8 @@ class SummarisePost(generics.GenericAPIView):
                 )
             except Exception as e:
                 return Response(
-                    {"status": "success", "message": f"An error occurred {(e)}"},
+                    {"status": "success",
+                        "message": f"An error occurred {(e)}"},
                     status=status.HTTP_400_BAD_REQUEST
                 )
         return Response({"status": "success", "message": "No new posts"}, status=status.HTTP_200_OK)
@@ -62,9 +63,8 @@ class SummarisePost(generics.GenericAPIView):
             str: The summarized content.
         """
         nlp = spacy.load("en_core_web_sm")
-
-        # extract individual sentences from tokenized document
         doc = nlp(text)
+        # extract individual sentences from tokenized document
         sentences = [sent.text for sent in doc.sents]
 
         # Create TF-IDF vectorizer to convert sentences into numerical vectors
@@ -80,5 +80,9 @@ class SummarisePost(generics.GenericAPIView):
         top_indices.sort()
 
         summary = ' '.join([sentences[i] for i in top_indices])
+
+        # summarise text again if summary is too long
+        if len(summary.split()) > 220:
+            return self.summarise_content(summary, num_sentences-1)
 
         return summary
