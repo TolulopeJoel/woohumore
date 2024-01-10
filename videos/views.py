@@ -22,7 +22,9 @@ class CreatePostAudio(GenericAPIView):
                 file_path,
                 resource_type="auto",
             )
+
             post.audio = upload_data["secure_url"]
+            post.audio_length = upload_data["duration"]
             post.no_audio = False
             post.save()
             # delete local audio file after upload
