@@ -7,7 +7,7 @@ import cloudinary
 import numpy as np
 import requests
 from django.conf import settings
-from moviepy.editor import ImageSequenceClip
+from moviepy.editor import ImageSequenceClip, concatenate_videoclips
 from PIL import Image
 from pyht import Client
 from pyht.client import TTSOptions
@@ -71,16 +71,17 @@ class CreatePostAudioView(GenericAPIView):
                 wf.writeframes(chunk)
             return audio_file_path
 
+
 class CreateNewsVideoView(GenericAPIView):
     queryset = Post.objects.filter(no_audio=False)
 
     def get(self, request, *args, **kwargs):
         for post in self.get_queryset():
-            video = self.create_video_chunks(post)
+            video = self.create_video_clips(post)
 
         return Response({"status": "success", "message": "News video created successfully"})
 
-    def create_video_chunks(self, post):
+    def create_video_clips(self, post):
         """
         Create video from a post.
 
@@ -92,7 +93,8 @@ class CreateNewsVideoView(GenericAPIView):
         """
 
         image_files = [
-            np.array(Image.open(BytesIO(requests.get(post).content)))
+            np.array(Image.open(BytesIO(requests.get(post).content))
+                     .resize((1440, 1080), Image.Resampling.LANCZOS))
             for post in post.images.values()
         ]
         duration = post.audio_length / len(image_files)
@@ -103,3 +105,4 @@ class CreateNewsVideoView(GenericAPIView):
         clip = ImageSequenceClip(image_files, fps=fps)
         # export video file
         clip.write_videofile(output_file, codec='libx264')
+        return clip
