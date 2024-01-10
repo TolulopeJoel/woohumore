@@ -1,9 +1,14 @@
 import os
 import random
 import wave
+from io import BytesIO
 
 import cloudinary
+import numpy as np
+import requests
 from django.conf import settings
+from moviepy.editor import ImageSequenceClip
+from PIL import Image
 from pyht import Client
 from pyht.client import TTSOptions
 from rest_framework.generics import GenericAPIView
@@ -12,7 +17,7 @@ from rest_framework.views import Response
 from posts.models import Post
 
 
-class CreatePostAudio(GenericAPIView):
+class CreatePostAudioView(GenericAPIView):
     queryset = Post.objects.filter(summarised=True, no_audio=True)
 
     def get(self, request, *args, **kwargs):
@@ -65,3 +70,36 @@ class CreatePostAudio(GenericAPIView):
                 # convert chunk to bytes and write to the WAV file
                 wf.writeframes(chunk)
             return audio_file_path
+
+class CreateNewsVideoView(GenericAPIView):
+    queryset = Post.objects.filter(no_audio=False)
+
+    def get(self, request, *args, **kwargs):
+        for post in self.get_queryset():
+            video = self.create_video_chunks(post)
+
+        return Response({"status": "success", "message": "News video created successfully"})
+
+    def create_video_chunks(self, post):
+        """
+        Create video from a post.
+
+        Args:
+            post: The post from which to create video from.
+
+        Returns & Raises:
+            None
+        """
+
+        image_files = [
+            np.array(Image.open(BytesIO(requests.get(post).content)))
+            for post in post.images.values()
+        ]
+        duration = post.audio_length / len(image_files)
+        fps = 1 / duration
+
+        media_path = settings.MEDIA_URL
+        output_file = f'{media_path}{post.id}_video.mp4'
+        clip = ImageSequenceClip(image_files, fps=fps)
+        # export video file
+        clip.write_videofile(output_file, codec='libx264')
