@@ -36,7 +36,7 @@ def clean_text(text):
         str: The cleaned text.
     """
     text = re.sub(r'\n+', ' ', text)
-    text = re.sub(r'[^\x00-\x7F]+', ' ', text)
+    text = re.sub(r'[^\x00-\x7F“”‘’"]+', ' ', text)
     text = re.sub(r'[\x80-\xFF]', '', text)
     text = re.sub(r'\s+', ' ', text).strip()
     # remove unwanted beginning and ending sentences
