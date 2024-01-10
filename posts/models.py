@@ -7,7 +7,6 @@ class Source(models.Model):
     name = models.CharField(max_length=255)
     domain = models.URLField(max_length=255)
     news_page = models.URLField()
-    active = models.BooleanField(default=True)
 
     title_tag = models.CharField(max_length=255)
     link_tag = models.CharField(max_length=255)
@@ -18,6 +17,9 @@ class Source(models.Model):
 
     image_tag = models.CharField(max_length=255)
     image_tag_class = models.CharField(max_length=255)
+
+    active = models.BooleanField(default=True)
+    find_all = models.BooleanField(default=True)
 
     def __str__(self):
         return self.name
