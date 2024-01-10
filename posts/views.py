@@ -24,7 +24,7 @@ class PostViewset(viewsets.ReadOnlyModelViewSet):
         return super().get_serializer_class()
 
 
-class SummarisePost(generics.GenericAPIView):
+class SummarisePostView(generics.GenericAPIView):
     queryset = Post.objects.filter(summarised=False, no_body=False)
 
     def get(self, request, *args, **kwargs):

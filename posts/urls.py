@@ -10,7 +10,7 @@ router.register('sources', views.SourceViewset, basename='sources')
 
 
 urlpatterns = [
-    path('summarise-posts/', views.SummarisePost.as_view(), name='summarise-posts')
+    path('summarise-posts/', views.SummarisePostView.as_view(), name='summarise-posts')
 ]
 
 urlpatterns += router.urls
