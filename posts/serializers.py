@@ -22,6 +22,7 @@ class PostListSerializer(serializers.ModelSerializer):
 
 class PostDetailSerializer(serializers.ModelSerializer):
     news_source = serializers.CharField(source="news_source.name")
+
     class Meta:
         model = Post
         fields = [
@@ -55,11 +56,12 @@ class SourceSerializer(serializers.ModelSerializer):
         return posts.count()
 
     def get_published_posts(self, obj):
-        posts = obj.posts.all()
-        published_posts = posts.filter(published=True)
-        return published_posts.count()
+        return self._get_posts_count(obj, True)
 
     def get_unpublished_posts(self, obj):
+        return self._get_posts_count(obj, False)
+
+    def _get_posts_count(self, obj, published):
         posts = obj.posts.all()
-        unpublished_posts = posts.filter(published=False)
-        return unpublished_posts.count()
+        published_posts = posts.filter(published=published)
+        return published_posts.count()
