@@ -148,9 +148,12 @@ class ScrapePostDetailView(GenericAPIView):
             return False
 
         for texts in body:
-            paragraphs = texts.find_all('p')
-            paragraphs = [p.text for p in paragraphs]
-            _body = "\n\n".join(paragraphs)
+            paragraphs = texts.find('p')
+            _body = paragraphs.text
+            if source.find_all:
+                paragraphs = texts.find_all('p')
+                paragraphs = [p.text for p in paragraphs]
+                _body = " ".join(paragraphs)
 
         post.body = clean_text(_body)
         post.images = _images
