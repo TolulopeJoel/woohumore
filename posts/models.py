@@ -40,6 +40,7 @@ class Post(models.Model):
 
     has_body = models.BooleanField(default=False)
     has_audio = models.BooleanField(default=False)
+    has_video = models.BooleanField(default=False)
     is_published = models.BooleanField(default=False)
     is_summarised = models.BooleanField(default=False)
 
