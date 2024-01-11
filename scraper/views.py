@@ -111,7 +111,7 @@ class ScrapePostListView(GenericAPIView):
 
 class ScrapePostDetailView(GenericAPIView):
     def get(self, request, *args, **kwargs):
-        queryset = Post.objects.filter(no_body=True)
+        queryset = Post.objects.filter(has_body=False)
         for post in queryset:
             self.get_body_n_image(post)
 
@@ -157,6 +157,6 @@ class ScrapePostDetailView(GenericAPIView):
 
         post.body = clean_text(_body)
         post.images = _images
-        post.no_body = False
+        post.has_body = True
         post.save()
         return True

@@ -38,10 +38,10 @@ class Post(models.Model):
     audio = CloudinaryField(blank=True)
     audio_length = models.FloatField(blank=True)
 
-    no_body = models.BooleanField(default=True)
-    no_audio = models.BooleanField(default=True)
-    published = models.BooleanField(default=False)
-    summarised = models.BooleanField(default=False)
+    has_body = models.BooleanField(default=False)
+    has_audio = models.BooleanField(default=False)
+    is_published = models.BooleanField(default=False)
+    is_summarised = models.BooleanField(default=False)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -51,9 +51,9 @@ class Post(models.Model):
         ordering = ('created_at',)
 
     def save(self, *args, **kwargs):
-        if self.published and not self.published_date:
+        if self.is_published and not self.published_date:
             self.published_date = timezone.now()
-        elif not self.published and self.published_date:
+        elif not self.is_published and self.published_date:
             self.published_date = None
         return super().save(*args, **kwargs)
 

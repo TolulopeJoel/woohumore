@@ -15,7 +15,7 @@ class SourceViewset(viewsets.ReadOnlyModelViewSet):
 
 
 class PostViewset(viewsets.ReadOnlyModelViewSet):
-    queryset = Post.objects.filter(published=True)
+    queryset = Post.objects.filter(is_published=True)
     serializer_class = PostListSerializer
 
     def get_serializer_class(self):
@@ -25,14 +25,14 @@ class PostViewset(viewsets.ReadOnlyModelViewSet):
 
 
 class SummarisePostView(generics.GenericAPIView):
-    queryset = Post.objects.filter(summarised=False, no_body=False)
+    queryset = Post.objects.filter(is_summarised=False, has_body=True)
 
     def get(self, request, *args, **kwargs):
         if queryset := self.get_queryset():
             try:
                 for post in queryset:
                     post.body = self.summarise_content(post.body, 5)
-                    post.summarised = True
+                    post.is_summarised = True
                     post.save()
 
                 return Response(

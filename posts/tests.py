@@ -37,8 +37,8 @@ class BaseAPITestCase(APITestCase):
             title="Example Post",
             body="Example body",
             link_to_news="https://example.com/odd/example-post",
-            published=True,
-            no_body=False,
+            is_published=True,
+            has_body=True,
         )
 
 
@@ -75,7 +75,7 @@ class PostTest(BaseAPITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
             len(response.data),
-            Post.objects.filter(published=True).count()
+            Post.objects.filter(is_published=True).count()
         )
 
     def test_published_post_bodied_post(self):
@@ -87,7 +87,7 @@ class PostTest(BaseAPITestCase):
 
         for post_data in response.data:
             post = Post.objects.get(id=post_data['id'])
-            self.assertFalse(post.no_body)
+            self.assertTrue(post.has_body)
 
     def test_published_post_published_date(self):
         """
@@ -118,7 +118,7 @@ class PostTest(BaseAPITestCase):
         """
         Tests that unpublished posts don't have a published date
         """
-        unpublished_posts = Post.objects.filter(published=False)
+        unpublished_posts = Post.objects.filter(is_published=False)
 
         for post in unpublished_posts:
             self.assertIsNone(post.published_date)
@@ -128,7 +128,7 @@ class PostTest(BaseAPITestCase):
         Tests that the published_date is automatically updated
         when a post is saved and published
         """
-        self.post.published = True
+        self.post.is_published = True
         self.post.save()
 
         self.assertIsNotNone(self.post.published_date)
@@ -141,7 +141,7 @@ class PostTest(BaseAPITestCase):
         response = self.client.get(endpoint)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        posts = Post.objects.filter(published=True).order_by('-created_at')
+        posts = Post.objects.filter(is_published=True).order_by('-created_at')
         for i, post_data in enumerate(response.data):
             post = posts[i]
             self.assertEqual(post_data['id'], post.id)
@@ -155,7 +155,7 @@ class PostTest(BaseAPITestCase):
             title="Example Post",
             body="Another body",
             link_to_news="https://example.com/odd/example-post",
-            published=True,
+            is_published=True,
             published_date="2024-01-05T12:00:00Z"
         )
         with self.assertRaises(IntegrityError):
@@ -164,7 +164,7 @@ class PostTest(BaseAPITestCase):
 
 class SummaryTest(BaseAPITestCase):
     def test_summarize_posts_no_new_posts(self):
-        self.published_post.summarised = True
+        self.published_post.is_summarised = True
         self.published_post.save()
 
         url = reverse('summarise-posts')

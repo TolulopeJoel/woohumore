@@ -18,7 +18,7 @@ from posts.models import Post
 
 
 class CreatePostAudioView(GenericAPIView):
-    queryset = Post.objects.filter(summarised=True, no_audio=True)
+    queryset = Post.objects.filter(is_summarised=True, has_audio=False)
 
     def get(self, request, *args, **kwargs):
         for post in self.get_queryset():
@@ -30,7 +30,7 @@ class CreatePostAudioView(GenericAPIView):
 
             post.audio = upload_data["secure_url"]
             post.audio_length = upload_data["duration"]
-            post.no_audio = False
+            post.has_audio = True
             post.save()
             # delete local audio file after upload
             os.remove(file_path)
@@ -73,7 +73,7 @@ class CreatePostAudioView(GenericAPIView):
 
 
 class CreateNewsVideoView(GenericAPIView):
-    queryset = Post.objects.filter(no_audio=False)
+    queryset = Post.objects.filter(has_audio=True)
 
     def get(self, request, *args, **kwargs):
         video_clips = []

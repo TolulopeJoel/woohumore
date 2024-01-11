@@ -61,7 +61,7 @@ class SourceSerializer(serializers.ModelSerializer):
     def get_unpublished_posts(self, obj):
         return self._get_posts_count(obj, False)
 
-    def _get_posts_count(self, obj, published):
+    def _get_posts_count(self, obj, is_published):
         posts = obj.posts.all()
-        published_posts = posts.filter(published=published)
+        published_posts = posts.filter(is_published=is_published)
         return published_posts.count()
