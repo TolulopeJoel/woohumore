@@ -76,12 +76,20 @@ class CreateNewsVideoView(GenericAPIView):
     queryset = Post.objects.filter(no_audio=False)
 
     def get(self, request, *args, **kwargs):
+        video_clips = []
         for post in self.get_queryset():
-            video = self.create_video_clips(post)
+            video = self.create_video_clip(post)
+            video_clips.append(video)
+
+        # join video clips into one video
+        final_video = concatenate_videoclips(video_clips, method="compose")
+        final_video.write_videofile(
+            f"{settings.MEDIA_VIDEOS_PATH}/final_video.mp4", codec='libx264'
+        )
 
         return Response({"status": "success", "message": "News video created successfully"})
 
-    def create_video_clips(self, post):
+    def create_video_clip(self, post):
         """
         Create video from a post.
 
@@ -100,9 +108,6 @@ class CreateNewsVideoView(GenericAPIView):
         duration = post.audio_length / len(image_files)
         fps = 1 / duration
 
-        media_path = settings.MEDIA_URL
-        output_file = f'{media_path}{post.id}_video.mp4'
         clip = ImageSequenceClip(image_files, fps=fps)
-        # export video file
-        clip.write_videofile(output_file, codec='libx264')
+
         return clip
