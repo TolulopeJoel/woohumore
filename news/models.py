@@ -9,7 +9,7 @@ class News(models.Model):
     title = models.CharField(max_length=255)
     video = CloudinaryField()
     posts = models.ManyToManyField(Post, related_name='news', blank=True)
-    published = models.BooleanField(default=False)
+    is_published = models.BooleanField(default=False)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_date = models.DateTimeField(auto_now=True)

@@ -36,7 +36,7 @@ class Post(models.Model):
     link_to_news = models.URLField(unique=True)
     images = models.JSONField(default=dict)
     audio = CloudinaryField(blank=True)
-    audio_length = models.FloatField(blank=True)
+    audio_length = models.FloatField(blank=True, null=True)
 
     has_body = models.BooleanField(default=False)
     has_audio = models.BooleanField(default=False)
