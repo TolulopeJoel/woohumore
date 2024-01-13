@@ -21,20 +21,23 @@ class CreatePostAudioView(GenericAPIView):
 
     def get(self, request, *args, **kwargs):
         for post in self.get_queryset():
-            file_path = create_audio(post.id, post.body)
-            upload_data = cloudinary.uploader.upload(
-                file_path,
-                resource_type="auto",
-            )
+            audio_data = create_audio(post.id, post.body)
 
-            post.audio = upload_data["secure_url"]
+            if "path" in audio_data:
+                upload_data = cloudinary.uploader.upload(
+                    audio_data["path"],
+                    resource_type="auto",
+                )
+                post.audio = upload_data["secure_url"]
+            else:
+                post.audio = audio_data["url"]
+
             post.audio_length = upload_data["duration"]
             post.has_audio = True
             post.save()
-            # delete local audio file after upload
-            os.remove(file_path)
 
         return Response({"status": "success", "message": "Audio upload successful."})
+
 
 class CreateNewsVideoView(GenericAPIView):
     queryset = Post.objects.filter(
