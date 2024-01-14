@@ -1,19 +1,11 @@
-import os
-from io import BytesIO
-
 import cloudinary
-import numpy as np
-import requests
-from django.conf import settings
-from moviepy.editor import ImageSequenceClip, concatenate_videoclips
-from PIL import Image
 from rest_framework.generics import GenericAPIView
 from rest_framework.views import Response
 
 from news.models import News
 from posts.models import Post
 
-from .utils import create_audio
+from .utils import create_audio, create_video, create_video_clips
 
 
 class CreatePostAudioView(GenericAPIView):
@@ -54,38 +46,11 @@ class CreateNewsVideoView(GenericAPIView):
 
         video_clips = []
         for post in self.get_queryset():
-            video = self.create_video_clip(post)
+            video = create_video_clips(post.images.values(), post.audio_length)
             video_clips.append(video)
 
-        # join video clips into one video
-        final_video = concatenate_videoclips(video_clips, method="compose")
-        video_path = f"{settings.MEDIA_VIDEOS_PATH}/{news.id}_final_video.mp4"
-        final_video.write_videofile(video_path, codec='libx264')
-        video_data = cloudinary.uploader.upload(video_path)  # upload video
-
-        news.video = video_data["secure_url"]
+        news.video = create_video(video_clips, news.id)
         news.is_published = True
         news.save()
 
         return Response({"status": "success", "message": "News video created successfully"})
-
-    def create_video_clip(self, post):
-        """
-        Create video from a post.
-
-        Args:
-            post: The post from which to create video from.
-
-        Returns & Raises:
-            None
-        """
-
-        image_files = [
-            np.array(Image.open(BytesIO(requests.get(post).content))
-                     .resize((1440, 1080), Image.Resampling.LANCZOS))
-            for post in post.images.values()
-        ]
-        duration = post.audio_length / len(image_files)
-        fps = 1 / duration
-
-        return ImageSequenceClip(image_files, fps=fps)
