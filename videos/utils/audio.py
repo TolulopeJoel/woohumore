@@ -9,11 +9,13 @@ from pyht.client import TTSOptions
 
 def create_audio(post_id, text, channels=1, sampwidth=2, framerate=24000) -> dict:
     """Creates an audio file from the given text using a text-to-speech (TTS) client."""
-    audio_file_path = f"{post_id}_output.wav"
+    file_path = f"{post_id}_output.wav"
     voice = random.choice(settings.PLAY_VOICE)
 
     try:
-        return _create_sdk_audio(text, voice, audio_file_path, channels, sampwidth, framerate)
+        return _create_sdk_audio(
+            text, voice, file_path, channels, sampwidth, framerate
+        )
     # if creating audio with SDK fails, use API instead
     except requests.exceptions.HTTPError:
         return _create_api_audio(text, voice)
@@ -55,5 +57,6 @@ def _create_api_audio(text, voice):
         "voice_engine": "PlayHT2.0",
     }
 
-    with requests.post(url, headers=headers, json=data) as response:
+    session = requests.Session()
+    with session.post(url, headers=headers, json=data) as response:
         return response.content
