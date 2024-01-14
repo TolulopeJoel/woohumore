@@ -1,3 +1,4 @@
+import os
 import cloudinary
 from rest_framework.generics import GenericAPIView
 from rest_framework.views import Response
@@ -21,6 +22,8 @@ class CreatePostAudioView(GenericAPIView):
                     resource_type="auto",
                 )
                 post.audio = upload_data["secure_url"]
+                # delete local audio file after upload
+                os.remove(audio_data["path"])
             else:
                 post.audio = audio_data["url"]
 
