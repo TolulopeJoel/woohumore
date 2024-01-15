@@ -25,7 +25,7 @@ def create_video(video_clips, news_id):
     final_video = concatenate_videoclips(video_clips, method="compose")
     video_path = f"{settings.MEDIA_VIDEOS_PATH}/{news_id}_final_video.mp4"
     final_video.write_videofile(video_path, codec='libx264', audio_codec='aac')
-    video_data = cloudinary.uploader.upload(video_path)  # upload video
+    video_data = cloudinary.uploader.upload(video_path, resource_type="video")
 
     return video_data["secure_url"]
 
