@@ -19,9 +19,9 @@ class News(models.Model):
         ordering = ('-published_date',)
 
     def save(self, *args, **kwargs):
-        if self.published and not self.published_date:
+        if self.is_published and not self.published_date:
             self.published_date = timezone.now()
-        elif not self.published and self.published_date:
+        elif not self.is_published and self.published_date:
             self.published_date = None
         return super().save(*args, **kwargs)
 

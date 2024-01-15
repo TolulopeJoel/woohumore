@@ -6,7 +6,7 @@ from rest_framework.views import Response
 from news.models import News
 from posts.models import Post
 
-from .utils import create_audio, create_video, create_video_clips
+from .utils import create_audio, create_video, create_video_clip
 
 
 class CreatePostAudioView(GenericAPIView):
@@ -42,14 +42,12 @@ class CreateNewsVideoView(GenericAPIView):
     )[:5]
 
     def get(self, request, *args, **kwargs):
-        news = News.objects.create(
-            title=self.get_queryset().first().title,
-            posts=self.get_queryset(),
-        )
+        news = News.objects.create(title=self.get_queryset().first().title)
+        news.posts.set(self.get_queryset())
 
         video_clips = []
         for post in self.get_queryset():
-            video = create_video_clips(post.images.values(), post.audio_length)
+            video = create_video_clip(post)
             video_clips.append(video)
 
         news.video = create_video(video_clips, news.id)
