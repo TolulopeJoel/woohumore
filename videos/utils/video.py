@@ -52,11 +52,24 @@ def create_video_clip(post, size=(1440, 1080)):
 
 
 def _add_audio_to_video_clip(id, video_clip, audio_url=None, audio_path=None):
+    """
+    Adds audio to a video clip.
+
+    Args:
+        id (str): The ID of the video clip.
+        video_clip (VideoClip): The video clip to which the audio will be added.
+        audio_url (str, optional): The URL of the audio file to be added.
+        audio_path (str, optional): The local path of the audio file to be added.
+
+    Returns:
+        VideoClip: The video clip with the added audio.
+    """
+
     if audio_url:
         audio_response = requests.get(audio_url)
 
         # Save the audio file
-        audio_filename = f"{id}_downloaded_audio.mp3"
+        audio_filename = f"{id}_downloaded_audio.wav"
         with open(audio_filename, "wb") as audio_file:
             audio_file.write(audio_response.content)
 
