@@ -1,10 +1,11 @@
 import os
+
 import cloudinary
 from rest_framework.generics import GenericAPIView
 from rest_framework.views import Response
 
-from news.models import News
-from posts.models import Post
+from apps.news.models import News
+from apps.posts.models import Post
 
 from .utils import create_audio, create_video, create_video_clip
 

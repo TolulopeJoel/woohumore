@@ -6,4 +6,4 @@ class SubscribersConfig(AppConfig):
     name = "apps.subscribers"
 
     def ready(self):
-        import subscribers.signals
+        import apps.subscribers.signals

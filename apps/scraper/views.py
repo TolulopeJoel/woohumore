@@ -7,8 +7,8 @@ from django.shortcuts import redirect
 from django.urls import reverse
 from rest_framework.generics import GenericAPIView
 
-from posts.models import Post, Source
-from posts.views import SourceViewset
+from apps.posts.models import Post, Source
+from apps.posts.views import SourceViewset
 
 
 def get_headers():
