@@ -48,6 +48,8 @@ class CreateNewsVideoView(GenericAPIView):
         video_clips = []
         for post in self.get_queryset():
             video = create_video_clip(post)
+            post.has_video = True
+            post.save()
             video_clips.append(video)
 
         news.video = create_video(video_clips, news.id)

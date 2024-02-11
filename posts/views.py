@@ -1,9 +1,8 @@
 import spacy
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
-
 from rest_framework import generics, viewsets
 from rest_framework.views import Response, status
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
 
 from .models import Post, Source
 from .serializers import PostDetailSerializer, PostListSerializer, SourceSerializer
@@ -44,8 +43,7 @@ class SummarisePostView(generics.GenericAPIView):
                 )
             except Exception as e:
                 return Response(
-                    {"status": "success",
-                        "message": f"An error occurred {(e)}"},
+                    {"status": "error", "message": f"An error occurred {(e)}"},
                     status=status.HTTP_400_BAD_REQUEST
                 )
         return Response({"status": "success", "message": "No new posts"}, status=status.HTTP_200_OK)
