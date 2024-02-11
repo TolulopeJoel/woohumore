@@ -149,7 +149,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # THIRD PARTY APPS  SETTINGS
 
-# play
+# play settings
 PLAY_USER_ID = env.str('PLAY_USER_ID')
 PLAY_API_KEY = env.str('PLAY_API_KEY')
 PLAY_VOICE = env.list('PLAY_VOICE')
@@ -160,3 +160,10 @@ cloudinary.config(
     api_key=env.str('CLOUDINARY_API_KEY'),
     api_secret=env.str('CLOUDINARY_API_SECRET')
 )
+
+
+# REST Framework settings
+REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': ['rest_framework.renderers.JSONRenderer'],
+    'EXCEPTION_HANDLER': 'utils.views.custom_exception_handler',
+}
