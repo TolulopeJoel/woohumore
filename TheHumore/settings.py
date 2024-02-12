@@ -10,21 +10,23 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
-
 import os
 from pathlib import Path
 
 import cloudinary
 import cloudinary.api
 import cloudinary.uploader
-from environs import Env
+import environ
 
-env = Env()
-env.read_env()
+# Initialise environment variables
+env = environ.Env()
+environ.Env.read_env()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Take environment variables from .env file
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
@@ -49,11 +51,11 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     # local apps
-    'news.apps.NewsConfig',
-    'videos.apps.VideosConfig',
-    'posts.apps.PostsConfig',
-    'subscribers.apps.SubscribersConfig',
-    'scraper.apps.ScraperConfig',
+    'apps.news',
+    'apps.videos',
+    'apps.posts',
+    'apps.subscribers',
+    'apps.scraper',
 
     # 3rd party apps
     'cloudinary',
@@ -149,10 +151,11 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # THIRD PARTY APPS  SETTINGS
 
-# play
+# play settings
 PLAY_USER_ID = env.str('PLAY_USER_ID')
 PLAY_API_KEY = env.str('PLAY_API_KEY')
 PLAY_VOICE = env.list('PLAY_VOICE')
+
 
 # cloudinary settings
 cloudinary.config(
@@ -160,3 +163,10 @@ cloudinary.config(
     api_key=env.str('CLOUDINARY_API_KEY'),
     api_secret=env.str('CLOUDINARY_API_SECRET')
 )
+
+
+# REST Framework settings
+REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': ['rest_framework.renderers.JSONRenderer'],
+    'EXCEPTION_HANDLER': 'utils.views.custom_exception_handler',
+}

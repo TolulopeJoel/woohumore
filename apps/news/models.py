@@ -2,7 +2,7 @@ from cloudinary.models import CloudinaryField
 from django.db import models
 from django.utils import timezone
 
-from posts.models import Post
+from apps.posts.models import Post
 
 
 class News(models.Model):

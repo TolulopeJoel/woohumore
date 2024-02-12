@@ -1,16 +1,22 @@
 import os
+
 import cloudinary
 from rest_framework.generics import GenericAPIView
 from rest_framework.views import Response
 
-from news.models import News
-from posts.models import Post
+from apps.news.models import News
+from apps.posts.models import Post
 
 from .utils import create_audio, create_video, create_video_clip
 
 
 class CreatePostAudioView(GenericAPIView):
-    queryset = Post.objects.filter(is_summarised=True, has_audio=False)
+    # Only supports posts w/ images for now.
+    queryset = (
+        Post.objects
+        .filter(is_summarised=True, has_audio=False)
+        .exclude(images__exact={})
+    )
 
     def get(self, request, *args, **kwargs):
         for post in self.get_queryset():
@@ -48,10 +54,14 @@ class CreateNewsVideoView(GenericAPIView):
         video_clips = []
         for post in self.get_queryset():
             video = create_video_clip(post)
+            post.has_video = True
+            post.save()
             video_clips.append(video)
 
         news.video = create_video(video_clips, news.id)
-        news.is_published = True
+
+        # TODO: algortithm to publish news
+
         news.save()
 
         return Response({"status": "success", "message": "News video created successfully"})
