@@ -2,16 +2,14 @@ import logging
 
 from django.http import HttpRequest, JsonResponse
 from rest_framework import serializers, status
-from rest_framework.decorators import api_view
 from rest_framework.exceptions import APIException
-from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import exception_handler
 
 logger = logging.getLogger(__name__)
 
 
-def custom_exception_handler(exception, context) -> Response | None:
+def custom_exception_handler(exception, context):
     if not isinstance(exception, serializers.ValidationError):
         logger.exception(
             'An exception occurred while handling request %s',

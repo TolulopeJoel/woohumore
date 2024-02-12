@@ -10,21 +10,23 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
-
 import os
 from pathlib import Path
 
 import cloudinary
 import cloudinary.api
 import cloudinary.uploader
-from environs import Env
+import environ
 
-env = Env()
-env.read_env()
+# Initialise environment variables
+env = environ.Env()
+environ.Env.read_env()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Take environment variables from .env file
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
@@ -153,6 +155,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 PLAY_USER_ID = env.str('PLAY_USER_ID')
 PLAY_API_KEY = env.str('PLAY_API_KEY')
 PLAY_VOICE = env.list('PLAY_VOICE')
+
 
 # cloudinary settings
 cloudinary.config(
