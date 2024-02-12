@@ -25,6 +25,13 @@ class PostViewset(viewsets.ReadOnlyModelViewSet):
 
 class SummarisePostView(generics.GenericAPIView):
     queryset = Post.objects.filter(is_summarised=False, has_body=True)
+    nlp, vectorizer = None, None
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not self.nlp:
+            self.nlp = spacy.load("en_core_web_sm")
+            self.vectorizer = TfidfVectorizer()
 
     def get(self, request, *args, **kwargs):
         if queryset := self.get_queryset():
@@ -60,14 +67,12 @@ class SummarisePostView(generics.GenericAPIView):
         Returns:
             str: The summarized content.
         """
-        nlp = spacy.load("en_core_web_sm")
-        doc = nlp(text)
+        doc = self.nlp(text)
         # extract individual sentences from tokenized document
         sentences = [sent.text for sent in doc.sents]
 
         # Create TF-IDF vectorizer to convert sentences into numerical vectors
-        vectorizer = TfidfVectorizer()
-        X = vectorizer.fit_transform(sentences)
+        X = self.vectorizer.fit_transform(sentences)
 
         # calculate sum of cosine similarity scores for each sentence
         similarity_matrix = cosine_similarity(X, X)
