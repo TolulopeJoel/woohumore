@@ -27,6 +27,9 @@ def create_video(video_clips, news_id):
     final_video.write_videofile(video_path, codec='libx264', audio_codec='aac')
     video_data = cloudinary.uploader.upload(video_path, resource_type="video")
 
+    # delete local video file after upload
+    os.remove(video_path)
+
     return video_data["secure_url"]
 
 
