@@ -29,9 +29,8 @@ class SummarisePostView(generics.GenericAPIView):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if not self.nlp:
-            self.nlp = spacy.load("en_core_web_sm")
-            self.vectorizer = TfidfVectorizer()
+        self.nlp = self.nlp or spacy.load("en_core_web_sm")
+        self.vectorizer = self.vectorizer or TfidfVectorizer()
 
     def get(self, request, *args, **kwargs):
         if queryset := self.get_queryset():
@@ -84,8 +83,11 @@ class SummarisePostView(generics.GenericAPIView):
 
         summary = ' '.join([sentences[i] for i in top_indices])
 
-        # summarise text again if summary is too long
-        if len(summary.split()) > 220:
-            return self.summarise_content(summary, num_sentences-1)
+        # Summarise text iteratively if summary is too long
+        while len(summary.split()) > 220 and num_sentences > 1:
+            num_sentences -= 1
+            top_indices = scores.argsort()[-num_sentences:][::-1]
+            top_indices.sort()
+            summary = ' '.join([sentences[i] for i in top_indices])
 
         return summary
