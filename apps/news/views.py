@@ -1,3 +1,9 @@
-from django.shortcuts import render
+from rest_framework.generics import ListAPIView
 
-# Create your views here.
+from .models import News
+from .serializers import NewsSerializer
+
+
+class NewsListAPIView(ListAPIView):
+    queryset = News.objects.filter(is_published=True)
+    serializer_class = NewsSerializer
