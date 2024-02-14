@@ -25,7 +25,7 @@ handler500 = 'utils.views.handler_500'
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('posts/', include('apps.posts.urls')),
-    path('', include('apps.scraper.urls')),
+    path('scraper/', include('apps.scraper.urls')),
     path('', include('apps.videos.urls')),
     path('news/', include('apps.news.urls')),
 ]
