@@ -26,20 +26,13 @@ def get_headers():
 
 def clean_text(text):
     """
-    Cleans the given text by removing non-ASCII characters,
-    unwanted sentences, characters and symbols, and extra whitespaces.
-
-    Args:
-        text (str): The text to be cleaned.
-
-    Returns:
-        str: The cleaned text.
+    Cleans the given text by removing unwanted sentences,
+    characters and symbols, and extra whitespaces.
     """
     text = re.sub(r'\n+', ' ', text)
     text = re.sub(r'[^\x00-\x7F“”‘’"]+', ' ', text)
     text = re.sub(r'[\x80-\xFF]', '', text)
     text = re.sub(r'\s+', ' ', text).strip()
-    # remove unwanted beginning and ending sentences
     text = re.sub(r"(Published|Last updated) .* GMT ", '', text)
     text = re.sub(r"From .* inbox\.", '', text)
     text = re.sub(r"For more .* newsletter\.", '', text)
@@ -49,14 +42,13 @@ def clean_text(text):
 
 
 class ScrapePostListView(GenericAPIView):
+    """
+    Returns list of new posts from the news sources.
+    """
     new_posts_count = 0
     queryset = SourceViewset.get_queryset(SourceViewset)
 
     def get(self, request, *args, **kwargs):
-        """
-        Retrieves news posts from the specified sources,
-        creates post objects, and returns a response with the count of new posts.
-        """
         queryset = self.get_queryset()
 
         for source in queryset:
@@ -73,14 +65,6 @@ class ScrapePostListView(GenericAPIView):
     def create_post(self, source: Source, soup):
         """
         Creates a new post object based on the provided source and post data.
-
-        Args:
-            source (Source): The source of the post.
-            post (BeautifulSoup): The BeautifulSoup element representing the post.
-
-        Returns:
-            None
-
         """
         links = soup.find_all(source.link_tag, class_=source.link_tag_class)
 
@@ -110,6 +94,10 @@ class ScrapePostListView(GenericAPIView):
 
 
 class ScrapePostDetailView(GenericAPIView):
+    """
+    Updates the post object with body(content) & post images.
+    """
+
     def get(self, request, *args, **kwargs):
         queryset = Post.objects.filter(has_body=False)
         for post in queryset:
@@ -119,44 +107,47 @@ class ScrapePostDetailView(GenericAPIView):
 
     def get_body_n_image(self, post):
         """
-        Retrieves the body and images of a post from the specified web page,
-        updates the post object, and returns a boolean indicating success.
-
-        Args:
-            post (Post): The post object to update.
-
-        Returns:
-            bool: True if the body and images were successfully retrieved and updated,
-                False otherwise.
-
+        Retrieves the body and images of a post from the
+        specified web page, and updates the post object.
         """
         session = requests.Session()
         page_response = session.get(post.link_to_news, headers=get_headers())
         soup = BeautifulSoup(page_response.text, 'lxml')
+        news_source = post.news_source
 
-        source = post.news_source
-        images = soup.find_all(
-            source.image_tag, class_=source.image_tag_class
+        # get post images
+        web_images = soup.find_all(
+            news_source.image_tag,
+            class_=news_source.image_tag_class
         )
-        _images = {
+        images_dict = {
             f"image_{index + 1}": image.img.get('src')
-            for index, image in enumerate(images)
+            for index, image in enumerate(web_images)
         }
-        body = soup.find_all(source.body_tag, class_=source.body_tag_class)
-        if body == []:
+
+        # get post body
+        post_content = soup.find_all(
+            news_source.body_tag,
+            class_=news_source.body_tag_class
+        )
+        if post_content == []:  # Delete posts with empty body
             post.delete()
             return False
 
-        for texts in body:
-            paragraphs = texts.find('p')
-            _body = paragraphs.text
-            if source.find_all:
-                paragraphs = texts.find_all('p')
-                paragraphs = [p.text for p in paragraphs]
-                _body = " ".join(paragraphs)
+        # For some posts only the first paragraph relates to the title.
+        # For others, all paragraphs relates to the title.
+        # So, based on the news source, decide wether to get the
+        # first paragraph or all paragraphs for the post body.
+        for bunch_of_paragraphs in post_content:
+            if news_source.find_all:
+                all_paragraphs = bunch_of_paragraphs.find_all('p')
+                all_paragraphs = [p.text for p in all_paragraphs]
+                post_body = " ".join(all_paragraphs)
+            else:
+                first_paragraph = bunch_of_paragraphs.find('p')
+                post_body = first_paragraph.text
 
-        post.body = clean_text(_body)
-        post.images = _images
+        post.body = clean_text(post_body)
+        post.images = images_dict
         post.has_body = True
         post.save()
-        return True
