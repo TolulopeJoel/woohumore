@@ -11,7 +11,6 @@ class ScrapePostListView(GenericAPIView):
     """
     Returns list of new posts from the news sources.
     """
-    new_posts_count = 0
     queryset = SourceViewset.get_queryset(SourceViewset)
 
     def get(self, request, *args, **kwargs):
@@ -25,10 +24,10 @@ class ScrapePostDetailView(GenericAPIView):
     """
     Updates the post object with body(content) & post images.
     """
+    queryset = Post.objects.filter(has_body=False)
 
     def get(self, request, *args, **kwargs):
-        queryset = Post.objects.filter(has_body=False)
-        for post in queryset:
+        for post in self.get_queryset():
             get_post_detail(post)
 
         return redirect(reverse('summarise-posts'))
