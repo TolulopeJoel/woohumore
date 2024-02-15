@@ -177,5 +177,10 @@ REST_FRAMEWORK = {
 SPECTACULAR_SETTINGS = {
     'TITLE': 'WooHumore API',
     'VERSION': '1.0.0',
+    'DESCRIPTION': """
+    API for a positive news video generator.
+    It automates curation of positive stories on the web, and compiles them into engaging videos,
+    providing a refreshing alternative to traditional news cycles.
+    """,
     'SERVE_INCLUDE_SCHEMA': False,
 }

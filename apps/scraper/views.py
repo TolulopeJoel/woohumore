@@ -13,7 +13,7 @@ class ScrapePostListView(GenericAPIView):
     """
     queryset = SourceViewset.get_queryset(SourceViewset)
 
-    def get(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         get_post_list(queryset)
 
@@ -26,7 +26,7 @@ class ScrapePostDetailView(GenericAPIView):
     """
     queryset = Post.objects.filter(has_body=False)
 
-    def get(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         for post in self.get_queryset():
             get_post_detail(post)
 

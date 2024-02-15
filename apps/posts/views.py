@@ -32,7 +32,7 @@ class SummarisePostView(generics.GenericAPIView):
         self.nlp = self.nlp or spacy.load("en_core_web_sm")
         self.vectorizer = self.vectorizer or TfidfVectorizer()
 
-    def get(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         if queryset := self.get_queryset():
             try:
                 for post in queryset:

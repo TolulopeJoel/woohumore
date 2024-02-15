@@ -18,7 +18,7 @@ class CreatePostAudioView(GenericAPIView):
         .exclude(images__exact={})
     )
 
-    def get(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         for post in self.get_queryset():
             play_ht = PlayAudioService()
             voice = random.choice(settings.PLAY_VOICE)
