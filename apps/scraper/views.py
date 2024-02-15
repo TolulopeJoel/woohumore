@@ -26,7 +26,7 @@ class ScrapePostDetailView(GenericAPIView):
     """
     queryset = Post.objects.filter(has_body=False)
 
-    def post(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
         for post in self.get_queryset():
             get_post_detail(post)
 
