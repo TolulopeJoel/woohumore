@@ -24,9 +24,10 @@ handler500 = 'utils.views.handler_500'
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('apps.posts.urls')),
-    path('', include('apps.scraper.urls')),
+    path('posts/', include('apps.posts.urls')),
+    path('scraper/', include('apps.scraper.urls')),
     path('', include('apps.videos.urls')),
+    path('news/', include('apps.news.urls')),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
