@@ -5,23 +5,19 @@ import cloudinary
 import numpy as np
 import requests
 from django.conf import settings
-from moviepy.editor import AudioFileClip, ImageSequenceClip, concatenate_videoclips
+from moviepy.editor import (AudioFileClip, ImageSequenceClip,
+                            concatenate_videoclips)
 from PIL import Image
 
+from apps.posts.models import Post
 
-def create_video(video_clips, news_id):
+
+def create_news_video(posts: list[Post], news_id: str) -> str:
     """
     Joins video clips into one video, writes it to a file,
     and uploads it to a cloud storage service.
-
-    Args:
-        video_clips (list): A list of video clips to be joined.
-        news_id (str): The ID of the news associated with the video.
-
-    Returns:
-        str: The secure URL of the uploaded video.
-
     """
+    video_clips = create_video_clips(posts)
     final_video = concatenate_videoclips(video_clips, method="compose")
     video_path = f"{settings.MEDIA_VIDEOS_PATH}/{news_id}_final_video.mp4"
     final_video.write_videofile(video_path, codec='libx264', audio_codec='aac')
@@ -33,7 +29,18 @@ def create_video(video_clips, news_id):
     return video_data["secure_url"]
 
 
-def create_video_clip(post, size=(1440, 1080)):
+def create_video_clips(posts: list[Post]) -> list[ImageSequenceClip]:
+    video_clips = []
+    for post in posts:
+        video = _create_video_clip(post)
+        post.has_video = True
+        post.save()
+        video_clips.append(video)
+
+    return video_clips
+
+
+def _create_video_clip(post: Post, size=(1440, 1080)) -> ImageSequenceClip:
     """
     Create video from a post.
     """
@@ -54,18 +61,14 @@ def create_video_clip(post, size=(1440, 1080)):
     return video_clip
 
 
-def _add_audio_to_video_clip(id, video_clip, audio_url=None, audio_path=None):
+def _add_audio_to_video_clip(
+    id: str,
+    video_clip: ImageSequenceClip,
+    audio_url: str = None,
+    audio_path: str = None
+) -> AudioFileClip:
     """
     Adds audio to a video clip.
-
-    Args:
-        id (str): The ID of the video clip.
-        video_clip (VideoClip): The video clip to which the audio will be added.
-        audio_url (str, optional): The URL of the audio file to be added.
-        audio_path (str, optional): The local path of the audio file to be added.
-
-    Returns:
-        VideoClip: The video clip with the added audio.
     """
 
     if audio_url:
