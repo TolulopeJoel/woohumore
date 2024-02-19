@@ -1,6 +1,7 @@
 import random
 
 from django.conf import settings
+
 from rest_framework.generics import GenericAPIView
 from rest_framework.views import Response
 

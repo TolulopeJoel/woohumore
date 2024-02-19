@@ -1,5 +1,6 @@
 from django.shortcuts import redirect
 from django.urls import reverse
+
 from rest_framework.generics import GenericAPIView
 
 from apps.posts.models import Post

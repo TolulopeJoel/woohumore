@@ -1,7 +1,8 @@
-from rest_framework.generics import GenericAPIView, ListAPIView, CreateAPIView
+from rest_framework.generics import GenericAPIView, ListAPIView
 from rest_framework.views import Response, status
 
 from apps.posts.models import Post
+
 from utils.video import create_news_video
 
 from .models import News
