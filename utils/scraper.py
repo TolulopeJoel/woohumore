@@ -59,14 +59,14 @@ def get_post_detail(post: Post) -> bool:
         news_source.body_tag,
         class_=news_source.body_tag_class
     )
-    if not post_content:  # Delete posts with empty body
+    if not post_content:  # Delete posts with no content
         post.delete()
         return False
 
     # For some posts only the first paragraph relates to the title.
     # For others, all paragraphs relates to the title.
     # So, based on the news source, decide wether to get the
-    # first paragraph or all paragraphs for the post body.
+    # first paragraph or all paragraphs as the post body.
     for bunch_of_paragraphs in post_content:
         if news_source.find_all:
             all_paragraphs = bunch_of_paragraphs.find_all('p')
