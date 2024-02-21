@@ -5,7 +5,7 @@ import requests
 from bs4 import BeautifulSoup
 
 from apps.posts.models import Post, Source
-from services.unsplash import UnsplashService
+from services.shutterstock import ShutterStockService
 
 
 def get_headers() -> dict:
@@ -89,8 +89,8 @@ def get_post_detail(post: Post) -> bool:
 
 
 def _get_post_images(search_word):
-    unsplash = UnsplashService()
-    return unsplash.get_images(search_word)
+    image_service = ShutterStockService()
+    return image_service.get_images(search_word)
 
 
 def get_post_list(sources: list[Source]) -> None:

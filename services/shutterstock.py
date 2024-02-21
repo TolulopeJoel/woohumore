@@ -4,31 +4,30 @@ import requests
 from django.conf import settings
 
 
-class UnsplashService:
-    def __init__(self) -> None:
+class ShutterStockService:
+    def __init__(self):
         self.headers = {
-            "Authorization": f"Client-ID {settings.UNSPLASH_CLIENT_ID}",
+            "Authorization": f"Bearer {settings.SHUTTERSTOCK_API_TOKEN}",
         }
         self.session = requests.Session()
 
-    def get_images(self, search_text):
-
+    def get_images(self, search_text: str) -> dict:
         params = {
             "query": search_text,
-            "content_filter": "high",
-            "orientation": "landscape",
             "per_page": 5,
+            "sort": "relevance",
         }
         params = urllib.parse.urlencode(params)
+        url = f"https://api.shutterstock.com/v2/images/search?" + params
 
-        url = f"https://api.unsplash.com/search/photos?{params}"
         response = self.session.get(url, headers=self.headers)
+        print(response.status_code)
 
         if response.status_code == 200:
             response_data = response.json()
 
-            pictures = response_data["results"][1:4]
-            data = {pic["links"]["download"] for pic in pictures}
+            pictures = response_data["data"][:4]
+            data = {pic["assets"]["preview_1500"]["url"] for pic in pictures}
 
             return {
                 f"image_{index + 35}": picture
