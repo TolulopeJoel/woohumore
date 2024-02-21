@@ -29,18 +29,20 @@ class NewsCreateView(GenericAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        queryset = self.get_queryset()
-        news = News.objects.create(title=queryset.first().title)
-        news.posts.set(queryset)
-        news.video = create_news_video(queryset, news.id)
-        news.save()
+        if queryset := self.get_queryset():
+            news = News.objects.create(title=queryset.first().title)
+            news.posts.set(queryset)
+            news.video = create_news_video(queryset, news.id)
+            news.save()
 
-        # TODO: algortithm to publish news
+            # TODO: algortithm to publish news
 
-        return Response(
-            {
-                "status": "success",
-                **serializer.data
-            },
-            status=status.HTTP_201_CREATED
-        )
+            return Response(
+                {
+                    "status": "success",
+                    **serializer.data
+                },
+                status=status.HTTP_201_CREATED
+            )
+
+        return Response({'status': 'failed'}, status=status.HTTP_400_BAD_REQUEST)

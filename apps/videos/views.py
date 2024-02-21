@@ -24,7 +24,8 @@ class CreatePostAudioView(GenericAPIView):
 
             post.audio = play_ht.create_audio(post.body, voice)
             post.audio_length = play_ht.audio_length
-            post.has_audio = True
+            if post.audio:
+                post.has_audio = True
             post.save()
 
         return Response({"status": "success", "message": "Audio upload successful."})
