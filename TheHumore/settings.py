@@ -158,6 +158,11 @@ PLAY_API_KEY = env.str('PLAY_API_KEY')
 PLAY_VOICE = env.list('PLAY_VOICE')
 
 
+# Image Services Settings
+UNSPLASH_CLIENT_ID=env.str('UNSPLASH_CLIENT_ID')
+SHUTTERSTOCK_API_TOKEN=env.str('SHUTTERSTOCK_API_TOKEN')
+
+
 # cloudinary settings
 cloudinary.config(
     cloud_name=env.str('CLOUD_NAME'),
