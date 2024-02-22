@@ -18,7 +18,8 @@ class PlayAudioService:
 
         payload = {"text": text, "voice": voice, "voice_engine": "PlayHT2.0"}
 
-        with self.session.post(url, headers=self.headers, json=payload) as response:
+        response = self.session.post(url, headers=self.headers, json=payload)
+        if response.status_code == 200:
             rp_data = response.json()
 
             # set duration length

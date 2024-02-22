@@ -1,5 +1,6 @@
 from django.shortcuts import redirect
 from django.urls import reverse
+
 from rest_framework.generics import GenericAPIView
 
 from apps.posts.models import Post
@@ -13,7 +14,7 @@ class ScrapePostListView(GenericAPIView):
     """
     queryset = SourceViewset.get_queryset(SourceViewset)
 
-    def get(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         get_post_list(queryset)
 

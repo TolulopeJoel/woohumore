@@ -49,7 +49,7 @@ class Post(models.Model):
     published_date = models.DateTimeField(blank=True, null=True)
 
     class Meta:
-        ordering = ('created_at',)
+        ordering = ('-created_at',)
 
     def save(self, *args, **kwargs):
         if self.is_published and not self.published_date:

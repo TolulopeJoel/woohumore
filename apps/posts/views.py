@@ -1,11 +1,17 @@
 import spacy
+
 from rest_framework import generics, viewsets
 from rest_framework.views import Response, status
+
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
 from .models import Post, Source
-from .serializers import PostDetailSerializer, PostListSerializer, SourceSerializer
+from .serializers import (
+    PostDetailSerializer,
+    PostListSerializer,
+    SourceSerializer
+)
 
 
 class SourceViewset(viewsets.ReadOnlyModelViewSet):

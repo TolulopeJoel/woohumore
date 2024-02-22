@@ -60,6 +60,7 @@ INSTALLED_APPS = [
     # 3rd party apps
     'cloudinary',
     'rest_framework',
+    'drf_spectacular',
 ]
 
 MIDDLEWARE = [
@@ -157,6 +158,11 @@ PLAY_API_KEY = env.str('PLAY_API_KEY')
 PLAY_VOICE = env.list('PLAY_VOICE')
 
 
+# Image Services Settings
+UNSPLASH_CLIENT_ID=env.str('UNSPLASH_CLIENT_ID')
+SHUTTERSTOCK_API_TOKEN=env.str('SHUTTERSTOCK_API_TOKEN')
+
+
 # cloudinary settings
 cloudinary.config(
     cloud_name=env.str('CLOUD_NAME'),
@@ -169,4 +175,17 @@ cloudinary.config(
 REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': ['rest_framework.renderers.JSONRenderer'],
     'EXCEPTION_HANDLER': 'utils.views.custom_exception_handler',
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'WooHumore API',
+    'VERSION': '1.0.0',
+    'DESCRIPTION': """
+    API for a positive news video generator.
+    It automates curation of positive stories on the web, and compiles them into engaging videos,
+    providing a refreshing alternative to traditional news cycles.
+    """,
+    'SERVE_INCLUDE_SCHEMA': False,
 }
