@@ -1,4 +1,3 @@
-import contextlib
 import re
 
 import requests
@@ -88,42 +87,52 @@ def get_post_detail(post: Post) -> bool:
     return True
 
 
-def get_post_list(sources: list[Source]) -> None:
+def get_post_list(sources: list[Source]) -> list:
+    all_posts = []
+
     for source in sources:
-        session = requests.Session()
-        page_response = session.get(
-            source.news_page, headers=get_headers()
-        )
-        # silence error when connection times out
-        with contextlib.suppress(requests.exceptions.ConnectTimeout):
-            soup = BeautifulSoup(page_response.text, 'lxml')
-            _create_post(source, soup)
+        with requests.Session() as session:
+            try:
+                page_response = session.get(
+                    source.news_page,
+                    headers=get_headers()
+                )
+                page_response.raise_for_status()
+                soup = BeautifulSoup(page_response.text, 'lxml')
+                posts = _create_post(source, soup)
+                all_posts.extend(posts)
+            except requests.ConnectTimeout:
+                # Handle connection timeout majestically 🤫
+                pass
+
+    return all_posts
 
 
 def _create_post(source: Source, soup: BeautifulSoup) -> None:
     """
     Creates a new post object based on the provided source and post data.
     """
+    posts = []
     links = soup.find_all(source.link_tag, class_=source.link_tag_class)
 
     for link in links:
-        title = link.find(source.title_tag) if link else None
-        post_title = title.text.strip()
-
-        if (post_link := link.get('href')) is None:
-            post_link = title.get('href')
+        title_element = link.find(source.title_tag)
+        post_title = title_element.text.strip()
+        post_link = link.get('href') or title_element.get('href', '')
 
         if not post_link.startswith("https"):
             post_link = source.domain + post_link
 
-        post_exist = Post.objects.filter(
+        existing_post = Post.objects.filter(
             link_to_news=post_link, news_source=source).first()
 
-        if not post_exist:
-            new_post = Post(
+        if not existing_post:
+            new_post = Post.objects.create(
                 news_source=source,
                 title=clean_text(post_title),
-                body="None",
+                body="...",
                 link_to_news=post_link,
             )
-            new_post.save()
+            posts.append(new_post)
+
+    return posts
