@@ -32,7 +32,7 @@ environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env.str("SECRET_KEY")
+SECRET_KEY = env("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env.bool("DEBUG", default=False)
@@ -61,10 +61,12 @@ INSTALLED_APPS = [
     'cloudinary',
     'rest_framework',
     'drf_spectacular',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -152,22 +154,25 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # THIRD PARTY APPS  SETTINGS
 
+# CORS settings
+CORS_ORIGIN_WHITELIST = env.list('CORS_ORIGIN_WHITELIST')
+
 # play settings
-PLAY_USER_ID = env.str('PLAY_USER_ID')
-PLAY_API_KEY = env.str('PLAY_API_KEY')
+PLAY_USER_ID = env('PLAY_USER_ID')
+PLAY_API_KEY = env('PLAY_API_KEY')
 PLAY_VOICE = env.list('PLAY_VOICE')
 
 
 # Image Services Settings
-UNSPLASH_CLIENT_ID=env.str('UNSPLASH_CLIENT_ID')
-SHUTTERSTOCK_API_TOKEN=env.str('SHUTTERSTOCK_API_TOKEN')
-
+FREEPIK_API_KEY=env('FREEPIK_API_KEY')
+UNSPLASH_CLIENT_ID=env('UNSPLASH_CLIENT_ID')
+SHUTTERSTOCK_API_TOKEN=env('SHUTTERSTOCK_API_TOKEN')
 
 # cloudinary settings
 cloudinary.config(
-    cloud_name=env.str('CLOUD_NAME'),
-    api_key=env.str('CLOUDINARY_API_KEY'),
-    api_secret=env.str('CLOUDINARY_API_SECRET')
+    cloud_name=env('CLOUD_NAME'),
+    api_key=env('CLOUDINARY_API_KEY'),
+    api_secret=env('CLOUDINARY_API_SECRET')
 )
 
 

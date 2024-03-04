@@ -18,10 +18,9 @@ class ShutterStockService:
             "sort": "relevance",
         }
         params = urllib.parse.urlencode(params)
-        url = f"https://api.shutterstock.com/v2/images/search?" + params
+        url = f"https://api.shutterstock.com/v2/images/search?{params}"
 
         response = self.session.get(url, headers=self.headers)
-        print(response.status_code)
 
         if response.status_code == 200:
             response_data = response.json()

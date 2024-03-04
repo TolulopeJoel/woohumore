@@ -28,6 +28,7 @@ urlpatterns = [
     path('scraper/', include('apps.scraper.urls')),
     path('videos/', include('apps.videos.urls')),
     path('news/', include('apps.news.urls')),
+    path('subscribers/', include('apps.subscribers.urls')),
 
     path('admin/', admin.site.urls),
     path('', SpectacularAPIView.as_view(), name='schema'),

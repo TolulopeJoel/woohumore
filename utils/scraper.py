@@ -5,7 +5,7 @@ import requests
 from bs4 import BeautifulSoup
 
 from apps.posts.models import Post, Source
-from services.shutterstock import ShutterStockService
+from utils.get_images import get_post_images
 
 
 def get_headers() -> dict:
@@ -45,6 +45,15 @@ def get_post_detail(post: Post) -> bool:
     soup = BeautifulSoup(page_response.text, 'lxml')
     news_source = post.news_source
 
+    # get post body and delete posts with no content
+    post_content = soup.find_all(
+        news_source.body_tag,
+        class_=news_source.body_tag_class
+    )
+    if not post_content:
+        post.delete()
+        return False
+
     web_images = soup.find_all(
         news_source.image_tag,
         class_=news_source.image_tag_class
@@ -56,17 +65,8 @@ def get_post_detail(post: Post) -> bool:
         for index, image in enumerate(web_images)
     }
     if len(images_dict) < 3:
-        images_dict |= _get_post_images(post.title)
-
-
-    # get post body and delete posts with no content
-    post_content = soup.find_all(
-        news_source.body_tag,
-        class_=news_source.body_tag_class
-    )
-    if not post_content:
-        post.delete()
-        return False
+        sourced_images = get_post_images(post.title)
+        images_dict.update(sourced_images)
 
     # For some posts only the first paragraph relates to the title.
     # For others, all paragraphs relates to the title.
@@ -86,11 +86,6 @@ def get_post_detail(post: Post) -> bool:
     post.has_body = True
     post.save()
     return True
-
-
-def _get_post_images(search_word):
-    image_service = ShutterStockService()
-    return image_service.get_images(search_word)
 
 
 def get_post_list(sources: list[Source]) -> None:
