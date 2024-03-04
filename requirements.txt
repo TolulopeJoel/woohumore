@@ -6,6 +6,7 @@ Django==4.1
 django-cors-headers==4.3.1
 django-environ==0.11.2
 djangorestframework==3.14.0
+drf-spectacular==0.27.1
 en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1-py3-none-any.whl
 lxml==4.9.4
 moviepy==1.0.3

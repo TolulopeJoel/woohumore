@@ -58,6 +58,7 @@ class SummarisePostView(generics.GenericAPIView):
                     {"status": "error", "message": f"An error occurred {(e)}"},
                     status=status.HTTP_400_BAD_REQUEST
                 )
+
         return Response({"status": "success", "message": "No new posts"}, status=status.HTTP_200_OK)
 
     def summarise_content(self, text, num_sentences=5):

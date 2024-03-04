@@ -13,7 +13,6 @@ class ScrapePostListView(GenericAPIView):
     """
     Returns list of new posts from the news sources.
     """
-    serializer_class = PostListSerializer
     queryset = SourceViewset.get_queryset(SourceViewset)
 
     def get_serializer(self, *args, **kwargs):
@@ -22,8 +21,8 @@ class ScrapePostListView(GenericAPIView):
     def post(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         posts = get_post_list(queryset)
+        serializer = PostListSerializer(posts, many=True)
 
-        serializer = self.get_serializer(posts, many=True)
         return Response(serializer.data)
 
 
@@ -34,7 +33,10 @@ class ScrapePostDetailView(GenericAPIView):
     queryset = Post.objects.filter(has_body=False)
 
     def get(self, request, *args, **kwargs):
-        for post in self.get_queryset():
+        queryset = self.get_queryset()
+        serializer = PostListSerializer(queryset, many=True)
+
+        for post in queryset:
             get_post_detail(post)
 
-        return redirect(reverse('summarise-posts'))
+        return Response(serializer.data)
