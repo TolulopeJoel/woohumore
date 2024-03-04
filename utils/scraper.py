@@ -1,4 +1,4 @@
-import contextlib
+import logging
 import re
 
 import requests
@@ -6,6 +6,8 @@ from bs4 import BeautifulSoup
 
 from apps.posts.models import Post, Source
 from utils.get_images import get_post_images
+
+logger = logging.getLogger(__name__)
 
 
 def get_headers() -> dict:
@@ -41,89 +43,105 @@ def get_post_detail(post: Post) -> bool:
     specified web page, and updates the post object.
     """
     session = requests.Session()
-    page_response = session.get(post.link_to_news, headers=get_headers())
-    soup = BeautifulSoup(page_response.text, 'lxml')
-    news_source = post.news_source
+    headers = get_headers()
 
-    # get post body and delete posts with no content
-    post_content = soup.find_all(
-        news_source.body_tag,
-        class_=news_source.body_tag_class
-    )
-    if not post_content:
-        post.delete()
+    try:
+        response = session.get(post.link_to_news, headers=headers)
+        soup = BeautifulSoup(response.text, 'lxml')
+        news_source = post.news_source
+
+        post_content = soup.find_all(
+            news_source.body_tag,
+            class_=news_source.body_tag_class
+        )
+
+        if not post_content:
+            post.delete()
+            return False
+
+        # Get images
+        web_images = soup.find_all(
+            news_source.image_tag,
+            class_=news_source.image_tag_class
+        )
+
+        images_dict = {
+            f"image_{index + 1}": image.img.get('src')
+            for index, image in enumerate(web_images)
+        }
+
+        # Fetch additional images if less than 3
+        if len(images_dict) < 3:
+            sourced_images = get_post_images(post.title)
+            images_dict.update(sourced_images)
+
+        # Choose post body extraction method based on news source:
+        # For some, only the first paragraph is relevant to the title,
+        # while for others, all paragraphs are relevant.
+        for bunch_of_paragraphs in post_content:
+            if news_source.find_all:
+                all_paragraphs = bunch_of_paragraphs.find_all('p')
+                all_paragraphs = [p.text for p in all_paragraphs]
+                post_body = " ".join(all_paragraphs)
+            else:
+                first_paragraph = bunch_of_paragraphs.find('p')
+                post_body = first_paragraph.text
+
+        post.body = clean_text(post_body)
+        post.images = images_dict
+        post.has_body = True
+        post.save()
+        return True
+
+    except requests.RequestException as e:
+        logging.exception(e)
         return False
 
-    web_images = soup.find_all(
-        news_source.image_tag,
-        class_=news_source.image_tag_class
-    )
-    # if post images is less than 3,
-    # fetch new images from external source.
-    images_dict = {
-        f"image_{index + 1}": image.img.get('src')
-        for index, image in enumerate(web_images)
-    }
-    if len(images_dict) < 3:
-        sourced_images = get_post_images(post.title)
-        images_dict.update(sourced_images)
 
-    # For some posts only the first paragraph relates to the title.
-    # For others, all paragraphs relates to the title.
-    # So, based on the news source, decide wether to get the
-    # first paragraph or all paragraphs as the post body.
-    for bunch_of_paragraphs in post_content:
-        if news_source.find_all:
-            all_paragraphs = bunch_of_paragraphs.find_all('p')
-            all_paragraphs = [p.text for p in all_paragraphs]
-            post_body = " ".join(all_paragraphs)
-        else:
-            first_paragraph = bunch_of_paragraphs.find('p')
-            post_body = first_paragraph.text
+def get_post_list(sources: list[Source]) -> list:
+    all_posts = []
 
-    post.body = clean_text(post_body)
-    post.images = images_dict
-    post.has_body = True
-    post.save()
-    return True
-
-
-def get_post_list(sources: list[Source]) -> None:
     for source in sources:
-        session = requests.Session()
-        page_response = session.get(
-            source.news_page, headers=get_headers()
-        )
-        # silence error when connection times out
-        with contextlib.suppress(requests.exceptions.ConnectTimeout):
-            soup = BeautifulSoup(page_response.text, 'lxml')
-            _create_post(source, soup)
+        with requests.Session() as session:
+            try:
+                page_response = session.get(
+                    source.news_page,
+                    headers=get_headers()
+                )
+                soup = BeautifulSoup(page_response.text, 'lxml')
+                posts = _create_post(source, soup)
+                all_posts.extend(posts)
+            except requests.ConnectTimeout as e:
+                logger.exception(f"{source} is down again, sigh.")
+
+    return all_posts
 
 
 def _create_post(source: Source, soup: BeautifulSoup) -> None:
     """
     Creates a new post object based on the provided source and post data.
     """
+    posts = []
     links = soup.find_all(source.link_tag, class_=source.link_tag_class)
 
     for link in links:
-        title = link.find(source.title_tag) if link else None
-        post_title = title.text.strip()
-
-        if (post_link := link.get('href')) is None:
-            post_link = title.get('href')
+        title_element = link.find(source.title_tag)
+        post_title = title_element.text.strip()
+        post_link = link.get('href') or title_element.get('href', '')
 
         if not post_link.startswith("https"):
             post_link = source.domain + post_link
 
-        post_exist = Post.objects.filter(
+        existing_post = Post.objects.filter(
             link_to_news=post_link, news_source=source).first()
 
-        if not post_exist:
-            new_post = Post(
+        if not existing_post:
+            new_post = Post.objects.create(
                 news_source=source,
                 title=clean_text(post_title),
-                body="None",
+                body="...",
                 link_to_news=post_link,
             )
-            new_post.save()
+            posts.append(new_post)
+
+    return posts
