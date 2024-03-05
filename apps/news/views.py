@@ -26,10 +26,11 @@ class NewsCreateView(GenericAPIView):
     )[:5]
 
     def post(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        if queryset := self.get_queryset():
+        if queryset:
             news = News.objects.create(title=queryset.first().title)
             news.posts.set(queryset)
             news.video = create_news_video(queryset, news.id)
