@@ -10,27 +10,29 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
-
 import os
 from pathlib import Path
 
 import cloudinary
 import cloudinary.api
 import cloudinary.uploader
-from environs import Env
+import environ
 
-env = Env()
-env.read_env()
+# Initialise environment variables
+env = environ.Env()
+environ.Env.read_env()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Take environment variables from .env file
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env.str("SECRET_KEY")
+SECRET_KEY = env("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env.bool("DEBUG", default=False)
@@ -58,10 +60,15 @@ INSTALLED_APPS = [
     # 3rd party apps
     'cloudinary',
     'rest_framework',
+    'drf_spectacular',
+    'corsheaders',
+    'whitenoise',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -137,6 +144,12 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
 STATIC_URL = 'static/'
+
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+STORAGES = {
+    'staticfiles': {'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage'}
+}
 MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 MEDIA_VIDEOS_PATH = BASE_DIR / 'media/videos'
@@ -149,14 +162,75 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # THIRD PARTY APPS  SETTINGS
 
-# play
-PLAY_USER_ID = env.str('PLAY_USER_ID')
-PLAY_API_KEY = env.str('PLAY_API_KEY')
+# CORS settings
+CORS_ORIGIN_WHITELIST = env.list('CORS_ORIGIN_WHITELIST')
+
+# play settings
+PLAY_USER_ID = env('PLAY_USER_ID')
+PLAY_API_KEY = env('PLAY_API_KEY')
 PLAY_VOICE = env.list('PLAY_VOICE')
+
+
+# Image Services Settings
+FREEPIK_API_KEY=env('FREEPIK_API_KEY')
+UNSPLASH_CLIENT_ID=env('UNSPLASH_CLIENT_ID')
+SHUTTERSTOCK_API_TOKEN=env('SHUTTERSTOCK_API_TOKEN')
 
 # cloudinary settings
 cloudinary.config(
-    cloud_name=env.str('CLOUD_NAME'),
-    api_key=env.str('CLOUDINARY_API_KEY'),
-    api_secret=env.str('CLOUDINARY_API_SECRET')
+    cloud_name=env('CLOUD_NAME'),
+    api_key=env('CLOUDINARY_API_KEY'),
+    api_secret=env('CLOUDINARY_API_SECRET')
 )
+
+
+# REST Framework settings
+REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': ['rest_framework.renderers.JSONRenderer'],
+    'EXCEPTION_HANDLER': 'utils.views.custom_exception_handler',
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'WooHumore API',
+    'VERSION': '1.0.0',
+    'DESCRIPTION': """
+    API for a positive news video generator.
+    It automates curation of positive stories on the web, and compiles them into engaging videos,
+    providing a refreshing alternative to traditional news cycles.
+    """,
+    'SERVE_INCLUDE_SCHEMA': False,
+}
+
+
+# Logging settings
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {'format': '[%(asctime)s] %(levelname)s:%(name)s:%(process)d:%(threadName)s: %(message)s'},
+    },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        }
+    },
+    'root': {'level': 'INFO', 'handlers': ['console']},
+    'loggers': {
+        'django.request': {
+            'handlers': ['console'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        'django.security.DisallowedHost': {
+            'level': 'ERROR',
+            'handlers': ['console'],
+            'propagate': False,
+        },
+    },
+}
+

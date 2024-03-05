@@ -1,11 +1,17 @@
 import spacy
+
 from rest_framework import generics, viewsets
 from rest_framework.views import Response, status
+
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
 from .models import Post, Source
-from .serializers import PostDetailSerializer, PostListSerializer, SourceSerializer
+from .serializers import (
+    PostDetailSerializer,
+    PostListSerializer,
+    SourceSerializer
+)
 
 
 class SourceViewset(viewsets.ReadOnlyModelViewSet):
@@ -25,6 +31,12 @@ class PostViewset(viewsets.ReadOnlyModelViewSet):
 
 class SummarisePostView(generics.GenericAPIView):
     queryset = Post.objects.filter(is_summarised=False, has_body=True)
+    nlp, vectorizer = None, None
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.nlp = self.nlp or spacy.load("en_core_web_sm")
+        self.vectorizer = self.vectorizer or TfidfVectorizer()
 
     def get(self, request, *args, **kwargs):
         if queryset := self.get_queryset():
@@ -46,6 +58,7 @@ class SummarisePostView(generics.GenericAPIView):
                     {"status": "error", "message": f"An error occurred {(e)}"},
                     status=status.HTTP_400_BAD_REQUEST
                 )
+
         return Response({"status": "success", "message": "No new posts"}, status=status.HTTP_200_OK)
 
     def summarise_content(self, text, num_sentences=5):
@@ -60,14 +73,12 @@ class SummarisePostView(generics.GenericAPIView):
         Returns:
             str: The summarized content.
         """
-        nlp = spacy.load("en_core_web_sm")
-        doc = nlp(text)
+        doc = self.nlp(text)
         # extract individual sentences from tokenized document
         sentences = [sent.text for sent in doc.sents]
 
         # Create TF-IDF vectorizer to convert sentences into numerical vectors
-        vectorizer = TfidfVectorizer()
-        X = vectorizer.fit_transform(sentences)
+        X = self.vectorizer.fit_transform(sentences)
 
         # calculate sum of cosine similarity scores for each sentence
         similarity_matrix = cosine_similarity(X, X)
@@ -79,8 +90,11 @@ class SummarisePostView(generics.GenericAPIView):
 
         summary = ' '.join([sentences[i] for i in top_indices])
 
-        # summarise text again if summary is too long
-        if len(summary.split()) > 220:
-            return self.summarise_content(summary, num_sentences-1)
+        # Summarise text iteratively if summary is too long
+        while len(summary.split()) > 220 and num_sentences > 1:
+            num_sentences -= 1
+            top_indices = scores.argsort()[-num_sentences:][::-1]
+            top_indices.sort()
+            summary = ' '.join([sentences[i] for i in top_indices])
 
         return summary

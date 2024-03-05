@@ -5,14 +5,19 @@ cloudinary==1.37.0
 Django==4.1
 django-cors-headers==4.3.1
 django-environ==0.11.2
+django-cors-headers==4.3.1
+django-environ==0.11.2
 djangorestframework==3.14.0
+drf-spectacular==0.27.1
 drf-spectacular==0.27.1
 en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1-py3-none-any.whl
 gunicorn==21.2.0
 lxml==4.9.4
 moviepy==1.0.3
+moviepy==1.0.3
 pyht==0.0.18
 requests==2.31.0
 scikit-learn==1.3.2
 spacy==3.7.2
+whitenoise==6.6.0
 whitenoise==6.6.0

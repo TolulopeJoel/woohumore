@@ -5,12 +5,12 @@ from . import views
 
 router = DefaultRouter()
 
-router.register('posts', views.PostViewset, basename='posts')
+router.register('', views.PostViewset, basename='posts')
 router.register('sources', views.SourceViewset, basename='sources')
 
 
 urlpatterns = [
-    path('summarise-posts/', views.SummarisePostView.as_view(), name='summarise-posts')
+    path('summarise/', views.SummarisePostView.as_view(), name='summarise-posts')
 ]
 
 urlpatterns += router.urls
